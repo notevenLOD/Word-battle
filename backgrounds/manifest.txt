@@ -1,0 +1,54 @@
+标点坦克 · 背景文档与障碍定位图
+页面内部坐标：1120 × 792
+导出的干净图片：2240 × 1584（2× 像素），文件位于 clean/
+网格图：2240 × 1584，文件位于 grid/；浅蓝线每 50 px，深蓝线每 100 px，红框为竞技场边界。
+竞技场内部范围：left=58, top=50, right=1062, bottom=733
+
+说明：clean/ 是移除 Canvas、自机、敌人和游戏 HUD 后的干净文档页；
+grid/ 在同一页面上叠加坐标网格和竞技场边界，方便读取障碍物位置。
+六张地图现在使用固定障碍布局（game.js 的 FIXED_WALLS）；下面记录各图的固定障碍数量与颜色，背景图本身不画高亮条。
+
+地图 1：Residual Attention
+  Word 文件名：Residual Attention_final(3).docx
+  干净图：clean/01_Residual_Attention.png
+  网格图：grid/01_Residual_Attention.png
+  障碍颜色：黄色（hue 47, sat 94%, light 60%）
+  固定高亮：6 道
+
+地图 2：Marginal Syntax
+  Word 文件名：Marginal_Syntax_clean.docx
+  干净图：clean/02_Marginal_Syntax.png
+  网格图：grid/02_Marginal_Syntax.png
+  障碍颜色：绿色（hue 143, sat 48%, light 51%）
+  固定高亮：13 道
+
+地图 3：The Quiet Ledger
+  Word 文件名：The_Quiet_Ledger_v4.docx
+  干净图：clean/03_The_Quiet_Ledger.png
+  网格图：grid/03_The_Quiet_Ledger.png
+  障碍颜色：蓝色（hue 213, sat 58%, light 59%）
+  固定高亮：11 道
+
+地图 4：Drafting Daylight
+  Word 文件名：Drafting_Daylight_review.docx
+  干净图：clean/04_Drafting_Daylight.png
+  网格图：grid/04_Drafting_Daylight.png
+  障碍颜色：橙色（hue 24, sat 84%, light 55%）
+  固定高亮：4 道
+
+地图 5：The Office of Small Errors
+  Word 文件名：Office_of_Small_Errors.docx
+  干净图：clean/05_The_Office_of_Small_Errors.png
+  网格图：grid/05_The_Office_of_Small_Errors.png
+  障碍颜色：紫色（hue 279, sat 46%, light 63%）
+  固定高亮：16 道
+
+地图 6：After the Cursor
+  Word 文件名：After_the_Cursor_final.docx
+  干净图：clean/06_After_the_Cursor.png
+  网格图：grid/06_After_the_Cursor.png
+  障碍颜色：青色（hue 181, sat 48%, light 48%）
+  固定高亮：18 道
+
+总览图：contact-sheet.png
+文本导出：../game-texts.txt
