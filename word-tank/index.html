@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f2f1">
+  <title>Residual Attention_final(3).docx - Word</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='9' fill='%23185abd'/%3E%3Cpath d='M13 16h8l5 26 6-19h6l6 19 5-26h8l-9 34h-7l-6-18-6 18h-7z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 8H5V4"/><path d="M5 8c2.2-2.5 5-3.7 8-3.2 3.6.6 6.2 3.4 6.5 7s-1.8 6.9-5.2 7.9"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 8h4V4"/><path d="M19 8c-2.2-2.5-5-3.7-8-3.2-3.6.6-6.2 3.4-6.5 7s1.8 6.9 5.2 7.9"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .3-8A6 6 0 0 0 6 9a4.5 4.5 0 0 0 1 9Z"/><path d="m9 14 3-3 3 3M12 11v5"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m7 9 5 5 5-5"/></symbol>
+    <symbol id="i-paste" viewBox="0 0 24 24"><path d="M8 4H5v17h14V4h-3"/><rect x="8" y="2.5" width="8" height="4" rx="1"/><path d="M8 11h8M8 15h8M8 19h5"/></symbol>
+    <symbol id="i-cut" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="m8 8 12 10M8 16 20 6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="1"/><path d="M16 8V3H4v13h4"/></symbol>
+    <symbol id="i-brush" viewBox="0 0 24 24"><path d="m14 4 6 6-9 9H5v-6z"/><path d="m12 6 6 6M5 19h14"/></symbol>
+    <symbol id="i-font-color" viewBox="0 0 24 24"><path d="m5 18 6-13h2l6 13M8 13h8"/><path d="M4 21h16" class="fill-accent"/></symbol>
+    <symbol id="i-highlight" viewBox="0 0 24 24"><path d="m6 15 7-9 4 4-8 8H5v-3z"/><path d="M4 21h16" class="fill-yellow"/></symbol>
+    <symbol id="i-bullets" viewBox="0 0 24 24"><circle cx="5" cy="7" r="1" class="fill-current"/><circle cx="5" cy="12" r="1" class="fill-current"/><circle cx="5" cy="17" r="1" class="fill-current"/><path d="M9 7h11M9 12h11M9 17h11"/></symbol>
+    <symbol id="i-number" viewBox="0 0 24 24"><path d="M4 6h2v4M4 14h3l-3 4h3M10 7h10M10 15h10"/></symbol>
+    <symbol id="i-indent" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 8v8M4 12l3-3M4 12l3 3"/></symbol>
+    <symbol id="i-outdent" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M7 8v8M7 12 4 9M7 12l-3 3"/></symbol>
+    <symbol id="i-align-left" viewBox="0 0 24 24"><path d="M4 6h16M4 10h11M4 14h16M4 18h9"/></symbol>
+    <symbol id="i-align-center" viewBox="0 0 24 24"><path d="M4 6h16M7 10h10M4 14h16M7 18h10"/></symbol>
+    <symbol id="i-align-right" viewBox="0 0 24 24"><path d="M4 6h16M9 10h11M4 14h16M11 18h9"/></symbol>
+    <symbol id="i-align-justify" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol>
+    <symbol id="i-line-space" viewBox="0 0 24 24"><path d="M7 4v16M4 7l3-3 3 3M4 17l3 3 3-3M12 6h8M12 12h8M12 18h8"/></symbol>
+    <symbol id="i-shading" viewBox="0 0 24 24"><path d="M5 5h14v14H5z" class="fill-shade"/><path d="m15 5 4 4v10h-4z"/></symbol>
+    <symbol id="i-clear" viewBox="0 0 24 24"><path d="m4 18 7-11 5 3-3 5"/><path d="m8 20 9-12 4 3-6 9zM3 21h18"/></symbol>
+    <symbol id="i-find" viewBox="0 0 24 24"><circle cx="10" cy="10" r="5.5"/><path d="m14.5 14.5 4.5 4.5M4 4h5M4 4v5"/></symbol>
+    <symbol id="i-select" viewBox="0 0 24 24"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3" stroke-dasharray="2 2"/><path d="M9 8h6v8H9z"/></symbol>
+    <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 8c1.8 2 1.8 6 0 8M20 5c3.5 4 3.5 10 0 14"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11c0 4 2.7 6 6 6s6-2 6-6M12 17v4M9 21h6"/></symbol>
+    <symbol id="i-editor" viewBox="0 0 24 24"><path d="M4 18V7a3 3 0 0 1 3-3h10"/><path d="M7 21V9h13v9l-3 3z"/><path d="M10 12h7M10 15h5"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18M3 15h18M9 4v16M15 4v16"/></symbol>
+    <symbol id="i-picture" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="8" cy="9" r="1.6"/><path d="m4 18 5-5 4 4 3-3 4 4"/></symbol>
+    <symbol id="i-shapes" viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><rect x="12" y="12" width="8" height="8"/><path d="m4 21 4-6 4 6z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V7M16 16v-8M20 16v-3"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m9 15 6-6"/><path d="M7.5 17.5 5 20a3.5 3.5 0 0 1-5-5l4-4a3.5 3.5 0 0 1 5 0M16.5 6.5 19 4a3.5 3.5 0 0 1 5 5l-4 4a3.5 3.5 0 0 1-5 0" transform="translate(-1 0) scale(.88)"/></symbol>
+    <symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 4h16v12H9l-5 4z"/><path d="M8 8h8M8 11h5"/></symbol>
+    <symbol id="i-header" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 8h18M7 12h10M7 16h7"/></symbol>
+    <symbol id="i-textbox" viewBox="0 0 24 24"><path d="M4 6V4h16v2M12 4v16M8 20h8"/></symbol>
+    <symbol id="i-symbol" viewBox="0 0 24 24"><path d="M4 5h16M4 9h8M4 13h16M4 17h8M4 21h16"/></symbol>
+    <symbol id="i-margins" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"/><path d="M7 3v18M17 3v18M3 7h18M3 17h18"/></symbol>
+    <symbol id="i-orientation" viewBox="0 0 24 24"><rect x="4" y="3" width="10" height="18"/><path d="M17 8h4v13h-4zM18 11v7M18 11l-1 2M18 11l1 2"/></symbol>
+    <symbol id="i-columns" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M9 4v16M15 4v16"/></symbol>
+    <symbol id="i-breaks" viewBox="0 0 24 24"><path d="M5 4h14v8H5zM5 12l3 3-3 3M12 15h8"/></symbol>
+    <symbol id="i-arrange" viewBox="0 0 24 24"><rect x="3" y="3" width="9" height="9"/><rect x="12" y="12" width="9" height="9"/><path d="M12 7h8v5M7 12v8h5"/></symbol>
+    <symbol id="i-spell" viewBox="0 0 24 24"><path d="m5 19 7-14 7 14M8 14h8"/><path d="m18 4 1.5 2L23 4" class="stroke-red"/></symbol>
+    <symbol id="i-wordcount" viewBox="0 0 24 24"><path d="M4 5h16M4 9h10M4 13h16M4 17h8M4 21h13"/><path d="M17 12h4v5h-4z"/></symbol>
+    <symbol id="i-track" viewBox="0 0 24 24"><path d="M4 6h7M4 10h5M13 10h7M13 14h7M4 18h7"/><path d="m9 4-2 2 2 2M15 12l-2 2 2 2"/></symbol>
+    <symbol id="i-accept" viewBox="0 0 24 24"><path d="m4 13 5 5L20 6"/><path d="M4 21h16" stroke-dasharray="2 2"/></symbol>
+    <symbol id="i-compare" viewBox="0 0 24 24"><path d="M4 4h7v16H4zM13 4h7v16h-7z"/><path d="M8 8h-1M16 8h1M8 12h-1M16 12h1"/></symbol>
+    <symbol id="i-protect" viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 5-3 8-8 9-5-1-8-4-8-9V6z"/><path d="M9 12h6v6H9zM10 12V9a2 2 0 0 1 4 0v3"/></symbol>
+    <symbol id="i-reading" viewBox="0 0 24 24"><path d="M3 5h7c1 0 2 .8 2 2v12c0-1.2-1-2-2-2H3zM21 5h-7c-1 0-2 .8-2 2v12c0-1.2 1-2 2-2h7z"/></symbol>
+    <symbol id="i-page-view" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M2 6v12M22 6v12" stroke-dasharray="2 2"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><path d="m4 16 12-12 4 4L8 20H4z"/><path d="m12 8 2 2M9 11l2 2M15 5l2 2"/></symbol>
+    <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5M10 7v6M7 10h6"/></symbol>
+    <symbol id="i-window" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M3 8h18M8 4v4"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.8M12 17.2v.2"/></symbol>
+    <symbol id="i-feedback" viewBox="0 0 24 24"><path d="M3 4h18v13H8l-5 4z"/><path d="M8 9h8M8 12h5"/></symbol>
+    <symbol id="i-theme" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.5a2 2 0 0 0 0-4H12a2 2 0 0 1 0-4h4a5 5 0 0 0 0-10z"/><circle cx="7.5" cy="10" r="1" class="fill-current"/><circle cx="10" cy="6.5" r="1" class="fill-current"/><circle cx="14.5" cy="6.5" r="1" class="fill-current"/></symbol>
+    <symbol id="i-dropcap" viewBox="0 0 24 24"><path d="M4 20V5h4v15M4 5h9"/><path d="M15 9h5v11h-5z"/></symbol>
+    <symbol id="i-watermark" viewBox="0 0 24 24"><path d="M3 4h18v16H3z"/><path d="m7 17 6-10h4L11 17z" opacity=".55"/></symbol>
+    <symbol id="i-toc" viewBox="0 0 24 24"><path d="M4 6h16M7 11h13M7 16h10M7 21h13"/><circle cx="4" cy="11" r=".9" class="fill-current"/><circle cx="4" cy="16" r=".9" class="fill-current"/><circle cx="4" cy="21" r=".9" class="fill-current"/></symbol>
+    <symbol id="i-footnote" viewBox="0 0 24 24"><path d="M5 4h14M5 9h8M5 14h14M5 19h8"/><path d="M18 14h3v6h-3z" opacity=".55"/></symbol>
+    <symbol id="i-citation" viewBox="0 0 24 24"><path d="M5 6h6v6H7c0 3-1 5-4 6M15 6h6v6h-4c0 3-2 5-5 6" transform="translate(0 2)"/></symbol>
+    <symbol id="i-caption" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12"/><path d="M8 19h8"/><path d="m8 12 3-3 2 2 3-3" opacity=".55"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14"/><path d="m3 6 9 7 9-7"/></symbol>
+    <symbol id="i-recipients" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 2.5-6 6-6s6 2 6 6"/><circle cx="17" cy="8" r="2"/><path d="M15 14c4 0 6 2 6 6"/></symbol>
+    <symbol id="i-merge" viewBox="0 0 24 24"><path d="M7 3v4c0 3 2 5 5 5h5M17 8l4 4-4 4M7 21v-8"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="m5 19 3-1 10-10-2-2L6 16z"/><path d="m15 5 2-2 4 4-2 2"/></symbol>
+    <symbol id="i-eraser" viewBox="0 0 24 24"><path d="m4 14 7-8 9 7-6 7H8z"/><path d="M4 20h16M9 8l8 7"/></symbol>
+    <symbol id="i-microphone" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11c0 4 2.7 6 6 6s6-2 6-6M12 17v4M8 21h8"/></symbol>
+  </svg>
+
+  <div class="word-app" id="app">
+    <header class="titlebar">
+      <div class="quick-access">
+        <div class="word-logo" aria-label="Word">W</div>
+        <div class="autosave" title="此文件已自动保存">
+          <span class="toggle on"><i></i></span>
+          <span>自动保存</span>
+        </div>
+        <button class="icon-btn" title="保存 (Ctrl+S)"><svg><use href="#i-save"/></svg></button>
+        <button class="icon-btn" title="撤销 (Ctrl+Z)"><svg><use href="#i-undo"/></svg></button>
+        <button class="icon-btn" title="重做 (Ctrl+Y)"><svg><use href="#i-redo"/></svg></button>
+        <span class="saved-state"><svg><use href="#i-cloud"/></svg> 已保存到 OneDrive</span>
+      </div>
+      <div class="doc-title"><span id="docTitle">Residual Attention_final(3).docx</span><span class="title-suffix"> - Word</span></div>
+      <div class="title-actions">
+        <button class="round-icon" title="搜索 (Alt+Q)"><svg><use href="#i-search"/></svg></button>
+        <button class="share-btn"><svg><use href="#i-share"/></svg>共享</button>
+        <div class="account-avatar" title="周行止">周</div>
+        <div class="editing-badge">编辑</div>
+        <div class="window-controls" aria-hidden="true"><span>—</span><span>□</span><span>×</span></div>
+      </div>
+    </header>
+
+    <nav class="ribbon-tabs" aria-label="功能区选项卡">
+      <button class="file-tab">文件</button>
+      <div class="tab-list">
+        <button class="tab active" data-tab="home">开始</button>
+        <button class="tab" data-tab="insert">插入</button>
+        <button class="tab" data-tab="draw">绘图</button>
+        <button class="tab" data-tab="design">设计</button>
+        <button class="tab" data-tab="layout">布局</button>
+        <button class="tab" data-tab="references">引用</button>
+        <button class="tab" data-tab="mailings">邮件</button>
+        <button class="tab" data-tab="review">审阅</button>
+        <button class="tab" data-tab="view">视图</button>
+        <button class="tab" data-tab="help">帮助</button>
+      </div>
+      <div class="tab-tools">
+        <button class="icon-btn small" title="搜索"><svg><use href="#i-search"/></svg></button>
+        <button class="icon-btn small" title="朗读"><svg><use href="#i-speaker"/></svg></button>
+        <button class="account-avatar small" title="账户">周</button>
+        <button class="ribbon-collapse" title="功能区选项">⌃</button>
+      </div>
+    </nav>
+
+    <div class="ribbon-body" id="ribbonBody">
+      <section class="ribbon-pane active" data-pane="home">
+        <div class="ribbon-group" style="--w:186px">
+          <div class="group-row">
+            <button class="big-btn" data-tip="粘贴"><span class="big-glyph paste-icon"><svg><use href="#i-paste"/></svg></span><span>粘贴</span></button>
+            <div class="btn-stack">
+              <div class="stack-row"><button class="small-btn"><svg><use href="#i-cut"/></svg></button><span>剪切</span></div>
+              <div class="stack-row"><button class="small-btn"><svg><use href="#i-copy"/></svg></button><span>复制</span></div>
+              <div class="stack-row"><button class="small-btn"><svg><use href="#i-brush"/></svg></button><span>格式刷</span></div>
+            </div>
+          </div>
+          <div class="group-label">剪贴板</div>
+        </div>
+
+        <div class="ribbon-group" style="--w:318px">
+          <div class="font-row">
+            <button class="combo font-combo">等线正文 <svg><use href="#i-chev"/></svg></button>
+            <button class="combo size-combo">10.5 <svg><use href="#i-chev"/></svg></button>
+            <span class="mini-sep"></span>
+            <button class="small-btn text-btn" title="增大字号">A<sup>↑</sup></button>
+            <button class="small-btn text-btn" title="减小字号">A<sup>↓</sup></button>
+            <span class="mini-sep"></span>
+            <button class="small-btn text-btn" title="清除格式"><svg><use href="#i-clear"/></svg></button>
+          </div>
+          <div class="font-row second">
+            <button class="format-btn strong" title="加粗">B</button>
+            <button class="format-btn italic" title="倾斜">I</button>
+            <button class="format-btn underline" title="下划线">U</button>
+            <button class="format-btn strike" title="删除线">ab</button>
+            <button class="format-btn" title="下标">x₂</button>
+            <button class="format-btn" title="上标">x²</button>
+            <span class="mini-sep"></span>
+            <button class="small-btn color-btn" title="字体颜色"><svg><use href="#i-font-color"/></svg></button>
+            <button class="small-btn highlight-btn" title="文本突出显示"><svg><use href="#i-highlight"/></svg></button>
+          </div>
+          <div class="group-label">字体</div>
+        </div>
+
+        <div class="ribbon-group" style="--w:250px">
+          <div class="para-top">
+            <button class="small-btn with-chev"><svg><use href="#i-bullets"/></svg><svg class="chev"><use href="#i-chev"/></svg></button>
+            <button class="small-btn with-chev"><svg><use href="#i-number"/></svg><svg class="chev"><use href="#i-chev"/></svg></button>
+            <button class="small-btn"><svg><use href="#i-outdent"/></svg></button>
+            <button class="small-btn"><svg><use href="#i-indent"/></svg></button>
+            <span class="mini-sep"></span>
+            <button class="small-btn with-chev"><svg><use href="#i-line-space"/></svg><svg class="chev"><use href="#i-chev"/></svg></button>
+            <button class="small-btn"><svg><use href="#i-shading"/></svg></button>
+          </div>
+          <div class="para-bottom">
+            <button class="small-btn active-soft"><svg><use href="#i-align-justify"/></svg></button>
+            <button class="small-btn"><svg><use href="#i-align-left"/></svg></button>
+            <button class="small-btn"><svg><use href="#i-align-center"/></svg></button>
+            <button class="small-btn"><svg><use href="#i-align-right"/></svg></button>
+          </div>
+          <div class="group-label">段落</div>
+        </div>
+
+        <div class="ribbon-group styles-group" id="stylesRibbonGroup" style="--w:218px">
+          <div class="style-gallery">
+            <button class="style-card"><span class="style-preview normal">正文</span><small>正文</small></button>
+            <button class="style-card"><span class="style-preview heading">标题 1</span><small>标题 1</small></button>
+            <button class="style-card"><span class="style-preview quote">强调</span><small>强调</small></button>
+          </div>
+          <div class="group-label">样式</div>
+        </div>
+
+        <div class="ribbon-group" style="--w:155px">
+          <div class="row-centered">
+            <button class="small-btn large-icon"><svg><use href="#i-find"/></svg></button>
+            <button class="small-btn large-icon"><svg><use href="#i-copy"/></svg></button>
+            <button class="small-btn with-chev"><svg><use href="#i-select"/></svg><svg class="chev"><use href="#i-chev"/></svg></button>
+          </div>
+          <div class="group-label">编辑</div>
+        </div>
+
+        <div class="ribbon-group voice-group" style="--w:98px">
+          <div class="row-centered">
+            <button class="small-btn large-icon" id="readAloudBtn" title="朗读（开启/关闭音效）"><svg><use href="#i-speaker"/></svg></button>
+            <button class="small-btn large-icon"><svg><use href="#i-mic"/></svg></button>
+          </div>
+          <div class="group-label">语音</div>
+        </div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="insert">
+        <div class="ribbon-group" style="--w:210px">
+          <div class="group-row">
+            <button class="big-btn"><span class="big-glyph"><svg><use href="#i-table"/></svg></span><span>表格</span></button>
+            <button class="big-btn"><span class="big-glyph green"><svg><use href="#i-picture"/></svg></span><span>图片</span></button>
+            <button class="big-btn"><span class="big-glyph orange"><svg><use href="#i-shapes"/></svg></span><span>形状</span></button>
+          </div><div class="group-label">表格</div>
+        </div>
+        <div class="ribbon-group" style="--w:206px">
+          <div class="group-row">
+            <button class="big-btn"><span class="big-glyph blue"><svg><use href="#i-chart"/></svg></span><span>图表</span></button>
+            <button class="big-btn"><span class="big-glyph"><svg><use href="#i-link"/></svg></span><span>链接</span></button>
+            <button class="big-btn"><span class="big-glyph"><svg><use href="#i-comment"/></svg></span><span>批注</span></button>
+          </div><div class="group-label">插图</div>
+        </div>
+        <div class="ribbon-group" style="--w:190px">
+          <div class="group-row">
+            <button class="big-btn"><span class="big-glyph"><svg><use href="#i-header"/></svg></span><span>页眉页脚</span></button>
+            <button class="big-btn"><span class="big-glyph"><svg><use href="#i-textbox"/></svg></span><span>文本框</span></button>
+            <button class="big-btn"><span class="big-glyph"><svg><use href="#i-symbol"/></svg></span><span>符号</span></button>
+          </div><div class="group-label">文本</div>
+        </div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="draw">
+        <div class="ribbon-group" style="--w:240px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-pen"/></svg></span><span>笔</span></button>
+          <button class="big-btn"><span class="big-glyph yellow"><svg><use href="#i-highlight"/></svg></span><span>荧光笔</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-eraser"/></svg></span><span>橡皮擦</span></button>
+        </div><div class="group-label">绘制</div></div>
+        <div class="ribbon-group" style="--w:150px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-select"/></svg></span><span>套索</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-shapes"/></svg></span><span>转换</span></button>
+        </div><div class="group-label">工具</div></div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="design">
+        <div class="ribbon-group" style="--w:224px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph blue"><svg><use href="#i-theme"/></svg></span><span>主题</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-font-color"/></svg></span><span>字体</span></button>
+        </div><div class="group-label">文档格式</div></div>
+        <div class="ribbon-group" style="--w:236px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-watermark"/></svg></span><span>水印</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-shading"/></svg></span><span>页面颜色</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-margins"/></svg></span><span>页面边框</span></button>
+        </div><div class="group-label">页面背景</div></div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="layout">
+        <div class="ribbon-group" style="--w:206px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-margins"/></svg></span><span>页边距</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-orientation"/></svg></span><span>纸张方向</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-page-view"/></svg></span><span>纸张大小</span></button>
+        </div><div class="group-label">页面设置</div></div>
+        <div class="ribbon-group" style="--w:230px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-columns"/></svg></span><span>栏</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-breaks"/></svg></span><span>分隔符</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-line-space"/></svg></span><span>行号</span></button>
+        </div><div class="group-label">页面设置</div></div>
+        <div class="ribbon-group" style="--w:210px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-indent"/></svg></span><span>缩进</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-arrange"/></svg></span><span>排列</span></button>
+        </div><div class="group-label">段落</div></div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="references">
+        <div class="ribbon-group" style="--w:230px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-toc"/></svg></span><span>目录</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-footnote"/></svg></span><span>插入脚注</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-citation"/></svg></span><span>引文</span></button>
+        </div><div class="group-label">引文与书目</div></div>
+        <div class="ribbon-group" style="--w:210px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-caption"/></svg></span><span>题注</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-wordcount"/></svg></span><span>索引</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-link"/></svg></span><span>交叉引用</span></button>
+        </div><div class="group-label">题注与索引</div></div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="mailings">
+        <div class="ribbon-group" style="--w:248px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph blue"><svg><use href="#i-mail"/></svg></span><span>开始邮件合并</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-recipients"/></svg></span><span>选择收件人</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-merge"/></svg></span><span>完成并合并</span></button>
+        </div><div class="group-label">邮件合并</div></div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="review">
+        <div class="ribbon-group" style="--w:240px"><div class="group-row">
+          <button class="big-btn" id="spellCheckBtn"><span class="big-glyph"><svg><use href="#i-spell"/></svg></span><span>拼写检查</span></button>
+          <button class="big-btn" id="wordCountBtn"><span class="big-glyph"><svg><use href="#i-wordcount"/></svg></span><span>字数统计</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-editor"/></svg></span><span>编辑器</span></button>
+        </div><div class="group-label">校对</div></div>
+        <div class="ribbon-group" style="--w:236px"><div class="group-row">
+          <button class="big-btn" id="newCommentBtn"><span class="big-glyph"><svg><use href="#i-comment"/></svg></span><span>新建批注</span></button>
+          <button class="big-btn" id="trackChangesBtn"><span class="big-glyph"><svg><use href="#i-track"/></svg></span><span>修订</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-accept"/></svg></span><span>接受</span></button>
+        </div><div class="group-label">批注</div></div>
+        <div class="ribbon-group" style="--w:200px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-compare"/></svg></span><span>比较</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-protect"/></svg></span><span>保护</span></button>
+        </div><div class="group-label">保护</div></div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="view">
+        <div class="ribbon-group" style="--w:232px"><div class="group-row">
+          <button class="big-btn" id="readingModeBtn"><span class="big-glyph blue"><svg><use href="#i-reading"/></svg></span><span>阅读视图</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-page-view"/></svg></span><span>页面视图</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-ruler"/></svg></span><span>标尺</span></button>
+        </div><div class="group-label">视图</div></div>
+        <div class="ribbon-group" style="--w:172px"><div class="group-row">
+          <button class="big-btn" id="zoomBtn"><span class="big-glyph"><svg><use href="#i-zoom"/></svg></span><span>显示比例</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-window"/></svg></span><span>窗口</span></button>
+        </div><div class="group-label">显示比例</div></div>
+      </section>
+
+      <section class="ribbon-pane" data-pane="help">
+        <div class="ribbon-group" style="--w:224px"><div class="group-row">
+          <button class="big-btn"><span class="big-glyph blue"><svg><use href="#i-help"/></svg></span><span>帮助</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-feedback"/></svg></span><span>反馈</span></button>
+          <button class="big-btn"><span class="big-glyph"><svg><use href="#i-reading"/></svg></span><span>培训</span></button>
+        </div><div class="group-label">帮助</div></div>
+      </section>
+
+      <button class="ribbon-menu-btn" title="功能区选项">⌄</button>
+    </div>
+
+    <main class="workspace" id="workspace">
+      <div class="ruler-corner"></div>
+      <div class="ruler ruler-h" aria-hidden="true"><span class="ruler-num n1">1</span><span class="ruler-num n2">2</span><span class="ruler-num n3">3</span><span class="ruler-num n4">4</span><span class="ruler-num n5">5</span><span class="ruler-num n6">6</span><span class="ruler-num n7">7</span><span class="ruler-num n8">8</span><span class="ruler-num n9">9</span></div>
+      <div class="ruler ruler-v" aria-hidden="true"></div>
+      <div class="canvas-area" id="canvasArea">
+        <div class="page-frame" id="pageFrame">
+          <div class="page" id="page">
+            <div class="page-header">
+              <span class="page-level-hint" id="pageLevelTop">第 1 关 · 第 1 波</span>
+              <span>Working Paper · Internal Circulation</span>
+            </div>
+
+            <article class="document" lang="en">
+              <h1>Residual Attention</h1>
+              <p class="subtitle">Interface, Interval, and the Organization of Office Life</p>
+              <p class="byline">Xingzhi Zhou　·　Department of Sociology, Dongchuan University</p>
+              <div class="title-rule"><span></span></div>
+
+              <div class="article-columns" id="articleColumns">
+                <div class="abstract"><strong>Abstract</strong>　This paper examines the ordinary intervals that organize office work: the pause between two tasks, the flicker of a cursor, and the small adjustments through which a document is made to look finished. Rather than treating attention as a scarce resource that is either spent or wasted, it proposes the notion of residual attention—the portion of awareness that remains attached to the workplace while being only loosely occupied by it. Drawing on observations of document work, interface theory, and the sociology of everyday practice, the paper argues that these intervals are neither irrelevant nor merely compensatory. They are part of the very grammar through which office life is performed, remembered, and, at times, quietly exceeded.</div>
+                <p class="keywords"><strong>Keywords</strong>　attention; interface; office work; punctuation; residual time</p>
+
+                <h2>I. The Problem of the Interval</h2>
+                <p>Office afternoons rarely produce events. A printer clears its throat at the end of the corridor; the air conditioner repeats the same gesture for everyone; a cursor blinks in the middle of a screen with the patience of a metronome that has forgotten how to keep time. People sit upright. Keyboards divide the silence into small, legible units. Yet if one looks more closely, many of the open windows do not belong to work at all: a shopping basket waits at the payment page, a film pauses on its opening titles, a message thread holds a joke that has been deleted and rewritten three times.</p>
+                <p>Studies of workplace distraction have generally treated such scenes as a boundary problem. Work occupies one side of the line, leisure the other; the task belongs to the former, the screen’s content to the latter. The distinction is useful, but it is also too clean. A person may read two pages of a novel while reviewing a spreadsheet, or answer an email while waiting for a chapter to load. Attention does not cross between these worlds with the neatness of a switch. It behaves more like ink dropped into water: first a distinct shape, then a slow diffusion that leaves no stable edge behind.</p>
+                <p>This paper is concerned with a smaller and less visible question. If the work interface is sufficiently dense, repetitive, and visually demanding, can it produce a fold of idleness inside itself? Must leisure always arrive from outside the document, or can it grow in the typographic spaces that the document already contains? The question is not whether office workers occasionally waste time—they do—but how the appearance of work can be preserved while attention quietly moves elsewhere.</p>
+                <p>The document offers an especially instructive site for this inquiry because it combines two opposing capacities. On one hand, it is the most visible trace of work: word counts rise, paragraphs acquire shape, comments accumulate, and every revision can be converted into a record of effort. On the other hand, the document is full of elements that carry no direct meaning—margins, leading, indentation, the white space after a full stop. These elements are not outside the text. They are the conditions under which the text becomes legible. It is precisely this secondary architecture that gives residual attention somewhere to go.</p>
+
+                <h2>II. The Interface as a Stage</h2>
+                <p>Office software is rarely just a tool. It contains a theory of how work should be seen. A title should look like a title; a change should leave a mark; a comment should carry a name and a time; the green light of autosave should remain quietly on, assuring everyone that the present is under control. The interface is therefore less a neutral container than a miniature theater. The screen is the stage, the cursor is the actor, and the taskbar is the entrance through which an audience may arrive at any moment.</p>
+                <p>Within this arrangement, busyness acquires a visual grammar. Multiple windows, rapid tab switching, a candidate list that appears and disappears above a sentence—all of these are legible signs of activity. Stasis, by contrast, is difficult to justify. A pointer that does not move for several minutes may cause a status to change; a document that receives no edits may prompt a platform to announce that no one is working. Time is diced into visible states, and the body is expected to supply a continuous stream of small, confirmable actions.</p>
+                <p>This helps explain why so much workplace loitering is drawn toward gestures that look like work. The person does not leave the desk, close the document, or turn away from the screen. Instead, attention is concealed inside an action that is sufficiently similar to writing to remain unremarkable from a distance. A few words are typed and deleted. A paragraph is scrolled past and returned to. A sentence is selected and then released. The performance of continuity is preserved, and leisure can take place in the narrow shadow it casts.</p>
+                <blockquote>Concealment does not begin with hiding. It begins with an action that is almost indistinguishable from work.</blockquote>
+
+                <h2>III. The Agency of Small Signs</h2>
+                <p>Punctuation is usually treated as an accessory to language. It marks pauses, emphasis, and hierarchy, but it is rarely granted a life of its own. In typesetting, however, punctuation is among the first things to acquire a position: a comma may end up at the margin or be pushed to the next line; a full stop may decide where a sentence stops being a sentence; a bracket may open a space that the surrounding prose is unable to close. Position gives these marks a modest agency.</p>
+                <p>When a punctuation mark leaves its assigned place, meaning begins to loosen. Move a full stop into the middle of a clause and the reader will hesitate; drag a question mark to the beginning of a paragraph and the whole passage becomes suspicious. Editing software permits such experiments and leaves almost no trace. A mark can be removed with a single keystroke and restored with another. In this reversibility, punctuation becomes the lightest of toys.</p>
+                <p>Idleness may begin precisely with this reversible destruction. A sentence is deleted and typed back exactly as it was. The cursor is placed in the middle of a paragraph and watched until it seems to breathe. The font is enlarged and reduced again, not because the page needs it but to see how the columns will rearrange themselves. These actions produce nothing, yet they offer a brief sense of control. They do not challenge the purpose of work; they introduce a small deviation at its edge.</p>
+                <p>From a distance, the deviation is almost invisible. A document is still a document. The word count continues to climb. The green light remains on. Only someone sitting close enough would notice that a few marks are moving in a way that seems inconsistent with the rules of typography. They drift along the gutters and between the lines, like a handful of ink marks practicing the art of staying out of sight.</p>
+
+                <h2>IV. An Ethics of Loitering</h2>
+                <p>It would be dangerous to romanticize loitering. It can conceal genuine exhaustion, and it can translate structural problems into private failures of discipline. An inability to concentrate is not always a failure of will. Repetitive tasks, permanent availability, and the constant possibility of interruption all draw down the reserves of attention. Leisure is not simply the opposite of work; it is sometimes the body asking for a pause that the schedule has not provided.</p>
+                <p>Yet it would be equally dishonest to deny that loitering contains a weak form of resistance. It is not a strike. It does not demand a change of rules, and it produces no clear political program. It merely borrows a small patch of ground from the time and interface that have been assigned to someone else. The patch may be no larger than a comma, but it demonstrates that attention has not been entirely requisitioned.</p>
+                <p>In this sense, the movement of signs inside a document has an allegorical quality. It keeps the surface of work intact while introducing the smallest possible disturbance beneath it. A manager sees a paper being carefully proofread; a colleague hears the steady sound of typing. Only the operator knows that the moving symbols do not point to any meaning. They have simply been allowed to live, for a moment, outside their proper place.</p>
+                <p>Such resistance is fragile. A footstep, a lifted head, or a single question—what are you working on?—is enough to end it. The document returns to its normal state. The marks settle at the ends of sentences, and the cursor comes to rest where it is supposed to be. Leisure contracts into an interval that can barely be proved, like the last pixel of light before a screen goes dark.</p>
+
+                <h2>V. Conclusion</h2>
+                <p>This paper does not set out to defend loitering, nor does it wish to present it as a model of good working life. Its aim is narrower: to show that the small gaps inside the work interface are a useful entry point for understanding contemporary attention. Work and leisure are not two sealed rooms. They often share a desk, a screen, and a measured stretch of time.</p>
+                <p>When a page is full, what holds the eye may not be the argument at all but the spaces between its characters—the intervals that cannot be fully administered. Punctuation moves there. A cursor blinks. The autosave light stays on. From a distance everything appears normal. Only someone close enough would know that the paper was never quite finished.</p>
+
+                <h2>References</h2>
+                <p class="ref">Goffman, E. (1959). <em>The Presentation of Self in Everyday Life</em>. New York: Doubleday.</p>
+                <p class="ref">Crary, J. (2013). <em>24/7: Late Capitalism and the Ends of Sleep</em>. London: Verso.</p>
+                <p class="ref">Suchman, L. (2007). <em>Human-Machine Reconfigurations</em>. Cambridge: Cambridge University Press.</p>
+                <p class="ref">Star, S. L. (1999). The ethnography of infrastructure. <em>American Behavioral Scientist</em>, 43(3), 377–391.</p>
+                <p class="ref">Zhou, X. (2024). Notes on the margins of office time. <em>Working Paper Series</em>, 18, 1–24.</p>
+                <p class="ack">Acknowledgements: The author thanks Lin Xiaoman for her careful reading of an earlier draft. Any punctuation found wandering beyond the margins remains the responsibility of the author.</p>
+              </div>
+            </article>
+
+            <div class="damage-meter" id="damageMeter">修正力度：I</div>
+
+            <div class="page-footer">
+              <span class="page-enemy-level" id="pageEnemyLevel" title="每击败一位首领，所有标点提升 5% 射速与 5% 血量"><span class="enemy-level-dot"></span>敌人 Lv. <b id="enemyLevel">1</b></span>
+              <span class="page-level-hint" id="pageLevelBottom">第 1 关 · 第 1 波</span>
+            </div>
+
+            <canvas id="gameCanvas" width="1120" height="792" aria-label="文档校对游戏区域"></canvas>
+
+            <div class="intro-comment" id="introComment">
+              <div class="comment-meta">
+                <span class="comment-avatar">李</span>
+                <div><strong>李华</strong><small>责任编辑 · 刚刚</small></div>
+                <button class="comment-close" id="introClose" aria-label="关闭">×</button>
+              </div>
+              <p>这篇英文稿的标点会自己动。移动你的光标来修正它们。被错误碰到会损失可修订次数；每修正一个首领，可以选择一个格式来强化修正。金色格式符会掉落格式碎片，集满三张还能多选一次。</p>
+              <div class="comment-keys">
+                <span><kbd>W A S D</kbd> 移动</span>
+                <span><kbd>I J K L</kbd> 四向开火</span>
+                <span><kbd>P</kbd> 暂停</span>
+                <span><kbd>B</kbd> 阅读视图</span>
+              </div>
+              <button class="comment-start" id="startGameBtn">开始校对 <span>↗</span></button>
+              <div class="comment-hint">I ↑ · J ← · K ↓ · L →　指针旁的加载圈就是可修订次数（生命值）</div>
+            </div>
+
+            <div class="wave-stamp" id="waveStamp"><span class="stamp-line"></span><span id="waveStampText">第 1 轮修订</span><span class="stamp-line"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="scrollbar-track" aria-hidden="true"><div class="scrollbar-thumb"></div></div>
+      <div class="reading-bar" id="readingBar">
+        <span class="reading-label"><svg><use href="#i-reading"/></svg> 阅读视图</span>
+        <span class="reading-divider"></span>
+        <span class="reading-tip">文档已进入只读状态</span>
+        <button id="exitReadingBtn">退出阅读视图 <kbd>B</kbd></button>
+      </div>
+      <div class="style-reward-window" id="styleRewardWindow" hidden>
+        <div class="format-float-head">
+          <span class="format-float-mark">Aa</span>
+          <span class="format-float-title">格式</span>
+          <span class="format-float-sub" id="styleRewardKicker">长句已拆解</span>
+          <span class="reward-enemy-level" id="rewardEnemyLevel">敌人 Lv. 1</span>
+        </div>
+        <div class="format-quickbar" aria-hidden="true">
+          <span class="format-quick-font">等线正文</span>
+          <span class="format-quick-size">10.5</span>
+          <span class="format-quick-sep"></span>
+          <span class="format-quick-style"><b>B</b><i>I</i><u>U</u></span>
+          <span class="format-quick-sep"></span>
+          <span class="format-quick-label">格式</span>
+        </div>
+        <div class="format-pane-caption"><strong>样式</strong><span>选择一种修订格式应用到当前文档</span></div>
+        <div class="format-style-list" id="styleRewardGrid"></div>
+        <div class="format-float-foot">按 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 选择 <span>·</span> 点击样式条目即应用</div>
+      </div>
+      <div class="pause-pill" id="pausePill"><span class="save-dot"></span>已暂停 · 自动保存完成<span class="pause-key">P 继续</span></div>
+      <div class="word-toast" id="wordToast" role="status">
+        <span class="toast-mark">✓</span>
+        <div><strong id="toastTitle">已保存</strong><span id="toastText">所有更改已保存到 OneDrive</span></div>
+      </div>
+    </main>
+
+    <footer class="statusbar">
+      <div class="status-left">
+        <span class="status-item">第 <b id="pageNo">1</b> 页，共 1 页</span>
+        <span class="status-sep"></span>
+        <span class="status-item word-counter" title="字数统计"><b id="wordCount">1,286</b> 个单词</span>
+        <span class="status-sep"></span>
+        <span class="status-item">英语(美国)</span>
+        <span class="status-sep"></span>
+        <span class="status-item proofing" id="proofingStatus"><span class="proof-icon">✓</span><span id="proofingText">校对：无问题</span></span>
+        <span class="status-sep game-metric"></span>
+        <span class="status-item game-metric" id="waveStatus" title="当前审阅轮次"><span class="wave-icon">↻</span> 第 <b id="waveNo">1</b> 轮审阅</span>
+        <span class="status-sep game-metric"></span>
+        <span class="status-item game-metric fragment-status" id="fragmentStatus" title="格式碎片：集满 3 张获得一次额外格式奖励"><span class="fragment-pips" id="fragmentPips"><i></i><i></i><i></i></span>格式碎片 <b id="fragmentCount">0</b>/3</span>
+      </div>
+      <div class="status-right">
+        <button class="status-btn" id="muteBtn" title="朗读音效"><svg><use href="#i-speaker"/></svg><span id="muteLabel">音效</span></button>
+        <span class="status-sep"></span>
+        <button class="status-icon-btn" title="阅读视图" id="statusReadingBtn"><svg><use href="#i-reading"/></svg></button>
+        <button class="status-icon-btn" title="页面视图"><svg><use href="#i-page-view"/></svg></button>
+        <span class="status-sep"></span>
+        <button class="status-icon-btn" id="zoomOutBtn" title="缩小">−</button>
+        <input class="zoom-slider" id="zoomSlider" type="range" min="60" max="130" value="85" aria-label="显示比例">
+        <button class="status-icon-btn" id="zoomInBtn" title="放大">＋</button>
+        <span class="zoom-value" id="zoomValue">85%</span>
+      </div>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="gameOverModal" hidden>
+    <div class="word-dialog" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+      <div class="dialog-head">
+        <span id="gameOverTitle">修订未完成</span>
+        <button class="dialog-close" id="gameOverClose" aria-label="关闭">×</button>
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-emblem"><span>!</span></div>
+        <div class="dialog-copy">
+          <h3>这一稿的标点压不住了</h3>
+          <p>你的可修订次数已用完。文档还停在最后一页，是否继续。</p>
+          <div class="dialog-stats">
+            <div><span>审阅轮次</span><strong id="statWave">1</strong></div>
+            <div><span>累计词数</span><strong id="statWords">1,286</strong></div>
+            <div><span>坚持时间</span><strong id="statTime">00:42</strong></div>
+            <div><span>最佳记录</span><strong id="statBest">—</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="dialog-btn primary" id="restartBtn">继续修订</button>
+        <button class="dialog-btn" id="viewDocumentBtn">只看文档</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="finalClearModal" hidden>
+    <div class="word-dialog final-clear" role="dialog" aria-modal="true" aria-labelledby="finalClearTitle">
+      <div class="dialog-head">
+        <span id="finalClearTitle">终审结果</span>
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-emblem final"><span>✓</span></div>
+        <div class="dialog-copy">
+          <h3>恭喜全部修订成功</h3>
+          <p>是否继续？（保留所有格式）</p>
+          <div class="dialog-stats">
+            <div><span>已通过</span><strong id="finalClearWave">第 40 波</strong></div>
+            <div><span>继续后</span><strong>进入下一段 40 波</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="dialog-btn primary" id="finalContinueBtn">继续修订</button>
+        <button class="dialog-btn" id="finalStopBtn">只看文档</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="wordCountModal" hidden>
+    <div class="word-dialog compact" role="dialog" aria-modal="true" aria-labelledby="countTitle">
+      <div class="dialog-head"><span id="countTitle">字数统计</span><button class="dialog-close" id="wordCountClose" aria-label="关闭">×</button></div>
+      <div class="count-body">
+        <div><span>页数</span><b>1</b></div>
+        <div><span>字数</span><b id="countWords">1,286</b></div>
+        <div><span>字符数（不计空格）</span><b id="countChars">7,014</b></div>
+        <div><span>段落数</span><b>37</b></div>
+        <p class="count-note">包含文本框、脚注和移动中的标点。</p>
+      </div>
+      <div class="dialog-actions"><button class="dialog-btn primary" id="wordCountOk">确定</button></div>
+    </div>
+  </div>
+
+  <div class="cheat-panel" id="cheatPanel" hidden>
+    <div class="cheat-head">
+      <strong>测试控制台</strong>
+      <span>F2 开关</span>
+      <button type="button" id="cheatClose" aria-label="关闭测试控制台">×</button>
+    </div>
+    <label class="cheat-check"><input type="checkbox" id="cheatInvincible" /> 无敌模式</label>
+    <div class="cheat-row">
+      <label for="cheatLevel">关卡</label>
+      <select id="cheatLevel"></select>
+      <button type="button" id="cheatJumpStart">跳到开始</button>
+      <button type="button" id="cheatJumpBoss">跳到关底</button>
+    </div>
+    <div class="cheat-row">
+      <label for="cheatStyle">攻击方式</label>
+      <select id="cheatStyle">
+        <option value="default">默认</option>
+        <option value="laser">激光</option>
+        <option value="rocket">火箭</option>
+        <option value="trifurcate">三叉</option>
+      </select>
+    </div>
+    <div class="cheat-readouts">
+      <span>移速 <strong id="cheatMoveReadout">100%</strong></span>
+      <span>攻速 <strong id="cheatFireReadout">100%</strong></span>
+    </div>
+    <div class="cheat-subhead">奖励卡 · 点击获得一张</div>
+    <div class="cheat-rewards" id="cheatRewards"></div>
+    <button type="button" class="cheat-clear" id="cheatClearRewards">清除全部已获得奖励卡</button>
+    <div class="cheat-hint" id="cheatHint">选择关卡后跳到开始或关底。</div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
