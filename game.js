@@ -11,7 +11,7 @@
   const PLAYER_BASE_SPEED = 154.4;
   const PLAYER_BASE_COOLDOWN = 0.33;
   const PLAYER_BASE_WIDTH = 20;
-  const ENEMY_HP_SCALE = 0.5;
+
   const RED = "#a9372a";
   const RED_BRIGHT = "#c84a38";
   const BLUE = "#2b62bb";
@@ -207,33 +207,33 @@
       size: 33,
     },
     question: {
-      glyph: "？", name: "问号", hp: 2, speed: 56, radius: 16,
+      glyph: "？", name: "问号", hp: 1, speed: 56, radius: 16,
       range: 305, fireRate: 1.65, wordValue: 17, color: "#a33227",
       size: 32, bulletSpeed: 178,
     },
     exclamation: {
-      glyph: "！", name: "感叹号", hp: 4, speed: 39, radius: 17,
+      glyph: "！", name: "感叹号", hp: 2, speed: 39, radius: 17,
       range: 260, fireRate: 2.4, wordValue: 27, color: "#8f2a20",
       size: 33, bulletSpeed: 158, spread: 3,
     },
     semicolon: {
-      glyph: "；", name: "分号", hp: 2, speed: 59, radius: 16,
+      glyph: "；", name: "分号", hp: 1, speed: 59, radius: 16,
       range: 370, fireRate: 2.35, wordValue: 22, color: "#b04732",
       size: 32, bulletSpeed: 335, sniper: true,
     },
     ellipsis: {
-      glyph: "……", name: "长句", hp: 33, speed: 76, radius: 33,
+      glyph: "……", name: "长句", hp: 18, speed: 76, radius: 33,
       range: 420, fireRate: 1.8, wordValue: 210, color: "#811f18",
       size: 36, bulletSpeed: 155, boss: true,
     },
     bracket_l: {
-      glyph: "[", name: "左方括号", hp: 25, speed: 74, radius: 26,
+      glyph: "[", name: "左方括号", hp: 12, speed: 74, radius: 26,
       range: 620, fireRate: 1.8, wordValue: 170, color: "#7b2230",
       size: 58, bulletSpeed: 185, boss: true, bracket: true, side: "left",
       bracketHalf: 31,
     },
     bracket_r: {
-      glyph: "]", name: "右方括号", hp: 25, speed: 74, radius: 26,
+      glyph: "]", name: "右方括号", hp: 12, speed: 74, radius: 26,
       range: 620, fireRate: 1.8, wordValue: 170, color: "#7b2230",
       size: 58, bulletSpeed: 185, boss: true, bracket: true, side: "right",
       bracketHalf: 31,
@@ -244,12 +244,12 @@
       size: 50, bulletSpeed: 180, boss: true, bouncer: true,
     },
     final: {
-      glyph: "审", name: "终审修订框", hp: 330, speed: 58, radius: 56,
+      glyph: "审", name: "终审修订框", hp: 180, speed: 58, radius: 56,
       range: 0, fireRate: 0, wordValue: 888, color: "#6e294e",
       size: 120, boss: true, finalBoss: true,
     },
     gold: {
-      glyph: "¶", name: "金色格式符", hp: 6, speed: 96, radius: 20,
+      glyph: "¶", name: "金色格式符", hp: 3, speed: 96, radius: 20,
       range: 0, fireRate: 0, wordValue: 0, color: "#b88624",
       size: 42, gold: true, noContact: true,
     },
@@ -287,12 +287,12 @@
       glyph: "力", desc: "修正力度 +3，每一级让自机造成的所有伤害提高 20%。",
     },
     {
-      id: "move_w", name: "轻快走位 +30%", rarity: "white", kind: "moveSpeed", value: 0.30,
-      glyph: "步", desc: "移速提升 30%，上限为初始移速的 200%。",
+      id: "move_w", name: "轻快走位 +50%", rarity: "white", kind: "moveSpeed", value: 0.50,
+      glyph: "步", desc: "移速提升 50%，上限为初始移速的 200%。",
     },
     {
-      id: "move_b", name: "轻快走位 +50%", rarity: "blue", kind: "moveSpeed", value: 0.50,
-      glyph: "步", desc: "移速提升 50%，上限为初始移速的 200%。",
+      id: "move_b", name: "轻快走位 +100%", rarity: "blue", kind: "moveSpeed", value: 1.00,
+      glyph: "步", desc: "移速提升 100%，上限为初始移速的 200%。",
     },
     {
       id: "shield_w", name: "扩宽背面盾", rarity: "white", kind: "shieldAdd", value: PLAYER_BASE_WIDTH / 2,
@@ -307,6 +307,14 @@
       glyph: "散", desc: "获得向外散射的额外弹道，重复选取时在最大角度外各再加 1 条弹道。",
     },
     {
+      id: "abundance_r", name: "格式繁多", rarity: "red", kind: "rewardOption", value: 1,
+      glyph: "繁", desc: "获得格式奖励卡时从 3 个选项增加到 4 个选项；无法叠加。",
+    },
+    {
+      id: "rapid_b", name: "急速修改", rarity: "blue", kind: "rapidEdit", value: 1,
+      glyph: "疾", desc: "移动时向移动方向发射两列额外子弹，移速越高伤害越高。",
+    },
+    {
       id: "bullet_r", name: "增补弹丸 +1", rarity: "red", kind: "extraBullet", value: 1,
       glyph: "弹", desc: "每次射击额外发射 1 枚平行弹丸。",
     },
@@ -316,7 +324,7 @@
     },
     {
       id: "rocket_r", name: "火箭校对", rarity: "red", kind: "style", value: "rocket",
-      glyph: "=", desc: "攻击方式改为火箭：单发伤害为原攻击的 300%，射速降为 50%，命中敌人后爆炸。",
+      glyph: "=", desc: "攻击方式改为火箭：深蓝色火箭弹单发伤害为原攻击的 300%，射速降为 50%，命中敌人后爆炸。",
     },
     {
       id: "trifurcate_r", name: "三叉", rarity: "red", kind: "style", value: "trifurcate",
@@ -560,6 +568,12 @@
       this.tone(880, 0.1, "sine", 0.02, 220);
       this.tone(1320, 0.16, "triangle", 0.016, 260, 0.08);
     }
+    roar() {
+      this.noise(0.7, 0.15, 260);
+      this.tone(72, 0.68, "sawtooth", 0.085, 28);
+      this.tone(118, 0.52, "square", 0.038, -42, 0.04);
+      this.tone(196, 0.34, "sawtooth", 0.026, -95, 0.08);
+    }
     escape() {
       this.tone(540, 0.16, "sine", 0.02, -240);
       this.tone(300, 0.2, "triangle", 0.016, -120, 0.1);
@@ -611,7 +625,8 @@
   let rewardChoices = [];
   let formatFragments = 0;
   let bonusRewardCharges = 0;
-  let rareSpawnTimer = 12;
+  let rareWillSpawn = false;
+  let rareSpawnAt = 0;
   let waveSpawnTotal = 0;
   let waveSpawned = 0;
   let waveSmallTotal = 0;
@@ -627,6 +642,7 @@
   let finalIntroTimer = 0;
   let finalVictoryDelay = 0;
   let finalBossFlash = 0;
+  let cheatOpenOnStart = false;
   let lastBossKind = null;
   let baseArticleSnapshot = null;
 
@@ -828,12 +844,10 @@
     if (key === "final") return Math.max(1, enemyHpFor("ellipsis") * 10);
     const def = ENEMY_TYPES[key];
     const level = enemyLevel();
-    const levelBonus = def.boss ? level : Math.max(0, level - 1);
-    // At Lv.1 the mail mark should sit at 20 HP. The level bonus contributes
-    // +1, so its pre-bonus coefficient is 19; other bosses keep their original
-    // Lv.1 values (18 / 14 / 16).
-    const base = key === "at" ? 19 : def.hp * ENEMY_HP_SCALE;
-    return Math.max(1, Math.round((base + levelBonus) * enemyHealthScale()));
+    // Normal enemies, rare enemies, elites and all three regular bosses share
+    // the same growth model: Lv.1 base HP + one HP per level, then the global
+    // level curve. Elite HP is multiplied by 1.2 after this calculation.
+    return Math.max(1, Math.round((def.hp + Math.max(0, level - 1)) * enemyHealthScale()));
   }
 
   function enemyFireDelay(base) {
@@ -841,7 +855,9 @@
   }
 
   function playerFireCooldown() {
-    const attackRate = player.firingStyle === "rocket" ? 0.5 : 1;
+    const attackRate = player.firingStyle === "rocket"
+      ? 0.5
+      : player.firingStyle === "laser" ? 2 : 1;
     return PLAYER_BASE_COOLDOWN / ((1 + player.fireRateBonus) * attackRate);
   }
 
@@ -1053,6 +1069,7 @@
       hp: 4, maxHp: 4, angle: -Math.PI / 2, invuln: 0,
       cooldown: 0, bob: 0, moving: false, ringFlash: 0,
       fireRateBonus: 0, moveBonus: 0, extraBullets: 0, damageLevel: 1,
+      formatAbundance: false, rapidEditStacks: 0, moveShotTimer: 0, moveAngle: 0,
       backShieldWidth: 0, shieldFlash: 0,
       firingStyle: "default", spreadUnlocked: false, spreadPairs: 0,
       orbiters: 0, orbitPhase: 0,
@@ -1102,6 +1119,7 @@
       e.finalChargeAngle = 0;
       e.finalInvulnerable = true;
       e.finalShieldFlash = 0;
+      e.finalRoared = false;
       e.finalTextIndex = 0;
       e.finalTextTimer = 0;
       e.finalOrbitDir = Math.random() < 0.5 ? -1 : 1;
@@ -1175,7 +1193,8 @@
     bossesCleared = 0;
     formatFragments = 0;
     bonusRewardCharges = 0;
-    rareSpawnTimer = rand(12, 18);
+    rareWillSpawn = false;
+    rareSpawnAt = 0;
     pendingArticleSwap = false;
     currentRewardSource = "boss";
     currentBossKind = "sentence";
@@ -1376,17 +1395,12 @@
     return e;
   }
 
-  function updateRareSpawn(dt) {
-    if (mode !== MODE.PLAYING || wavePhase !== "spawning") return;
+  function updateRareSpawn() {
+    if (mode !== MODE.PLAYING || !rareWillSpawn || rareSpawnedThisWave) return;
+    if (waveSmallSpawned < rareSpawnAt) return;
     if (enemies.some((e) => e.gold)) return;
-    if (rareSpawnedThisWave) return;
-    if (!waveSmallTotal || waveSmallSpawned >= Math.ceil(waveSmallTotal / 2)) return;
-    rareSpawnTimer -= dt;
-    if (rareSpawnTimer <= 0) {
-      spawnRareEnemy();
-      rareSpawnedThisWave = true;
-      rareSpawnTimer = rand(24, 36);
-    }
+    spawnRareEnemy();
+    rareSpawnedThisWave = true;
   }
 
   function waveQueueFor(n) {
@@ -1447,6 +1461,10 @@
     waveSmallTotal = spawnQueue.filter((key) => !bossKeys.has(key)).length;
     waveSmallSpawned = 0;
     rareSpawnedThisWave = false;
+    rareWillSpawn = n > 1 && (n === 2 || Math.random() < 0.33);
+    rareSpawnAt = rareWillSpawn && waveSmallTotal > 0
+      ? Math.floor(Math.random() * (Math.floor(waveSmallTotal / 2) + 1))
+      : 0;
     wavePhase = "spawning";
     spawnTimer = 0.42;
     waveKills = 0;
@@ -1495,6 +1513,7 @@
 
   /* ---------------- post-boss style rewards ---------------- */
   function rewardEligible(reward) {
+    if (reward.kind === "rewardOption") return !player.formatAbundance;
     if (reward.kind === "moveSpeed") return player.moveBonus < 0.9999;
     if (reward.kind === "shieldSet") return player.backShieldWidth < reward.value;
     if (reward.kind === "shieldAdd") return true;
@@ -1503,9 +1522,15 @@
     if (reward.kind === "style" && reward.value === "rocket") return player.firingStyle !== "rocket";
     if (reward.kind === "style" && reward.value === "trifurcate") return player.firingStyle !== "trifurcate";
     if (reward.kind === "extraBullet") return true;
+    if (reward.kind === "rapidEdit") return player.rapidEditStacks <= 0;
     if (reward.kind === "orbiter") return player.orbiters < 16;
     if (reward.kind === "aura") return player.aura <= 0;
     return true;
+  }
+
+  function rewardCardWeight(reward) {
+    if (reward.kind !== "style" || player.firingStyle === "default") return 1;
+    return reward.value === player.firingStyle ? 1 : 0.5;
   }
 
   function pickWeightedReward(pool) {
@@ -1522,7 +1547,15 @@
       roll -= RARITIES[key].weight;
       if (roll <= 0) { rarity = key; break; }
     }
-    return choose(groups[rarity]);
+    const cards = groups[rarity];
+    const cardTotal = cards.reduce((sum, reward) => sum + rewardCardWeight(reward), 0);
+    let cardRoll = Math.random() * cardTotal;
+    let chosen = cards[cards.length - 1];
+    for (const reward of cards) {
+      cardRoll -= rewardCardWeight(reward);
+      if (cardRoll <= 0) { chosen = reward; break; }
+    }
+    return chosen;
   }
 
   function shuffleInPlace(items) {
@@ -1635,6 +1668,10 @@
     styleRewardWindow.style.top = "8px";
   }
 
+  function rewardOptionCount() {
+    return player && player.formatAbundance ? 4 : 3;
+  }
+
   function openStyleReward(source = "boss") {
     if (mode === MODE.REWARD) return;
     currentRewardSource = source;
@@ -1648,12 +1685,13 @@
     hitFlash = 0;
     for (const w of walls) w.flash = 0;
     const allRed = source === "final-boss";
-    rewardChoices = sampleRewardChoices(3, { allRed });
+    const choiceCount = rewardOptionCount();
+    rewardChoices = sampleRewardChoices(choiceCount, { allRed });
     renderStyleRewardChoices();
     updateEnemyLevelHud();
     styleRewardKicker.textContent = source === "fragments"
       ? "格式碎片已集齐"
-      : allRed ? "终审完成 · 三项红色格式" : bossDefeatedTitle();
+      : allRed ? `终审完成 · ${choiceCount} 项红色格式` : bossDefeatedTitle();
     styleRewardWindow.classList.toggle("from-fragments", source === "fragments");
     styleRewardWindow.hidden = false;
     positionStyleReward();
@@ -1699,6 +1737,12 @@
         } else {
           player.spreadPairs += 1;
         }
+        break;
+      case "rewardOption":
+        player.formatAbundance = true;
+        break;
+      case "rapidEdit":
+        player.rapidEditStacks += reward.value;
         break;
       case "style":
         player.firingStyle = reward.value;
@@ -1794,7 +1838,7 @@
       return;
     }
     if (mode === MODE.REWARD) {
-      const rewardKeys = { Digit1: 0, Digit2: 1, Digit3: 2, Numpad1: 0, Numpad2: 1, Numpad3: 2 };
+      const rewardKeys = { Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Numpad1: 0, Numpad2: 1, Numpad3: 2, Numpad4: 3 };
       if (rewardKeys[code] !== undefined) {
         event.preventDefault();
         chooseStyleReward(rewardKeys[code]);
@@ -1896,6 +1940,7 @@
       boss: !!options.boss,
       rocket: !!options.rocket,
       trifurcate: !!options.trifurcate,
+      rapidEdit: !!options.rapidEdit,
     });
   }
 
@@ -1916,35 +1961,47 @@
     return offsets;
   }
 
-  function laserEndpoint(angle) {
+  function laserRayGeometry(angle, perpendicularOffset = 0) {
+    const origin = playerMuzzle(angle, perpendicularOffset);
     const dx = Math.cos(angle);
     const dy = Math.sin(angle);
-    let length = 18;
-    for (let s = 18; s <= 760; s += 3) {
-      const x = player.x + dx * s;
-      const y = player.y + dy * s;
+    let length = 0;
+    for (let s = 0; s <= 760; s += 3) {
+      const x = origin.x + dx * s;
+      const y = origin.y + dy * s;
       if (x < ARENA.left || x > ARENA.right || y < ARENA.top || y > ARENA.bottom) break;
       if (walls.some((w) => pointInRect(x, y, w, 2))) break;
       length = s;
     }
-    return { dx, dy, length };
+    return { angle, x0: origin.x, y0: origin.y, dx, dy, length, offset: perpendicularOffset };
+  }
+
+  function buildLaserRays() {
+    const rays = [];
+    const raysPerLane = 1 + player.extraBullets;
+    for (const laneOffset of playerShotOffsets()) {
+      const angle = aimAngle + laneOffset;
+      for (let i = 0; i < raysPerLane; i++) {
+        const offset = raysPerLane === 1 ? 0 : (i - (raysPerLane - 1) / 2) * 9;
+        const ray = laserRayGeometry(angle, offset);
+        rays.push({ ...ray, life: 0.13 });
+      }
+    }
+    return rays;
   }
 
   function fireLaser() {
-    const angles = playerShotOffsets().map((offset) => aimAngle + offset);
     const hitRadiusBonus = 7;
-    const laserDamage = 2 + player.extraBullets;
-    player.laserRays = [];
-    for (const angle of angles) {
-      const ray = laserEndpoint(angle);
-      player.laserRays.push({ angle, length: ray.length, life: 0.13 });
+    const laserDamage = 2;
+    player.laserRays = buildLaserRays();
+    for (const ray of player.laserRays) {
       for (let i = enemies.length - 1; i >= 0; i--) {
         const e = enemies[i];
         if (!e || e.spawnT > 0) continue;
-        const t = (e.x - player.x) * ray.dx + (e.y - player.y) * ray.dy;
-        if (t < 10 || t > ray.length) continue;
-        const px = player.x + ray.dx * t;
-        const py = player.y + ray.dy * t;
+        const t = (e.x - ray.x0) * ray.dx + (e.y - ray.y0) * ray.dy;
+        if (t < 8 || t > ray.length) continue;
+        const px = ray.x0 + ray.dx * t;
+        const py = ray.y0 + ray.dy * t;
         if (dist2(e.x, e.y, px, py) <= (e.radius + hitRadiusBonus) ** 2) {
           damageEnemy(e, laserDamage, px, py);
         }
@@ -1976,7 +2033,7 @@
         const offset = bulletsPerRay === 1 ? 0 : (i - (bulletsPerRay - 1) / 2) * 9;
         const muzzle = playerMuzzle(angle, offset);
         spawnBullet(muzzle.x, muzzle.y, angle, 335, true, {
-          rocket: true, radius: 5.4, damage: 3, life: 3.1, color: "#d27a32",
+          rocket: true, radius: 5.4, damage: 3, life: 3.1, color: "#1b3f6b",
         });
       }
     }
@@ -2055,6 +2112,24 @@
     });
     shake = Math.max(shake, 5.5);
     sound.explode(false);
+  }
+
+  function rapidEditBulletDamage() {
+    const ratio = clamp(player.speed / PLAYER_BASE_SPEED, 1, 2);
+    return 0.25 + (ratio - 1) * 1.75;
+  }
+
+  function fireRapidEdit() {
+    const stacks = Math.max(1, player.rapidEditStacks);
+    const columns = stacks * 2;
+    const damage = rapidEditBulletDamage();
+    for (let i = 0; i < columns; i++) {
+      const offset = (i - (columns - 1) / 2) * PLAYER_BASE_WIDTH;
+      const muzzle = playerMuzzle(player.moveAngle, offset);
+      spawnBullet(muzzle.x, muzzle.y, player.moveAngle, 610, true, {
+        damage, radius: 1.5, color: "#4a2a1b", rapidEdit: true,
+      });
+    }
   }
 
   function firePlayer() {
@@ -2289,6 +2364,9 @@
     player.extraBullets = 0;
     player.spreadUnlocked = false;
     player.spreadPairs = 0;
+    player.formatAbundance = false;
+    player.rapidEditStacks = 0;
+    player.moveShotTimer = 0;
     player.firingStyle = "default";
     player.laserLife = 0;
     player.laserRays = [];
@@ -2380,6 +2458,11 @@
     showWaveStamp("第 1 轮修订");
     pausePill.classList.remove("show");
     updateHud();
+    if (cheatOpenOnStart) {
+      cheatOpenOnStart = false;
+      cheatPanel.hidden = false;
+      syncCheatPanel();
+    }
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   }
 
@@ -2394,6 +2477,7 @@
     if (!player) return;
     player.invuln = Math.max(0, player.invuln - dt);
     player.cooldown = Math.max(0, player.cooldown - dt);
+    player.moveShotTimer = Math.max(0, player.moveShotTimer - dt);
     player.ringFlash = Math.max(0, player.ringFlash - dt);
     player.shieldFlash = Math.max(0, player.shieldFlash - dt);
     for (const ray of player.laserRays) ray.life -= dt;
@@ -2415,6 +2499,8 @@
     player.vx = lerp(player.vx, targetVx, accel);
     player.vy = lerp(player.vy, targetVy, accel);
     player.moving = Math.hypot(player.vx, player.vy) > 20;
+    const moveInput = ix !== 0 || iy !== 0;
+    if (moveInput) player.moveAngle = Math.atan2(iy, ix);
     if (player.moving) {
       moveWithWalls(player, player.vx * dt, player.vy * dt, player.radius);
       player.bob = Math.sin(animationTime * 19) * 0.9;
@@ -2424,19 +2510,24 @@
       player.bob = lerp(player.bob, 0, Math.min(1, dt * 12));
     }
 
+    if (player.rapidEditStacks > 0 && player.moving && moveInput) {
+      if (player.moveShotTimer <= 0) {
+        fireRapidEdit();
+        player.moveShotTimer = playerFireCooldown();
+      }
+    } else {
+      player.moveShotTimer = 0;
+    }
+
     const activeFire = fireOrder.length ? fireOrder[fireOrder.length - 1] : null;
     if (activeFire && FIRE_DIRS[activeFire]) {
       aimAngle = FIRE_DIRS[activeFire].angle;
       if (player.cooldown <= 0) firePlayer();
     }
     if (player.firingStyle === "laser" && activeFire && FIRE_DIRS[activeFire]) {
-      // Keep the beam visually continuous while the trigger is held; damage
+      // Keep the beams visually continuous while the trigger is held; damage
       // still pulses at the fire-rate cooldown inside fireLaser().
-      player.laserRays = playerShotOffsets().map((offset) => {
-        const angle = aimAngle + offset;
-        const ray = laserEndpoint(angle);
-        return { angle, length: ray.length, life: 0.13 };
-      });
+      player.laserRays = buildLaserRays();
       const primary = player.laserRays[0];
       player.laserLife = 0.13;
       player.laserAngle = primary ? primary.angle : aimAngle;
@@ -2742,6 +2833,51 @@
     }
   }
 
+  function finalBossRoar(e) {
+    for (let wave = 0; wave < 3; wave++) {
+      particles.push({
+        type: "ring", x: e.x, y: e.y, vx: 0, vy: 0,
+        life: 0.32 + wave * 0.12, maxLife: 0.32 + wave * 0.12,
+        size: 24 + wave * 10, targetSize: 190 + wave * 70,
+        color: wave % 2 ? "rgba(204,72,54,.5)" : "rgba(210,163,54,.55)",
+      });
+    }
+    for (let i = 0; i < 30; i++) {
+      const angle = rand(0, Math.PI * 2);
+      const speed = rand(55, 230);
+      particles.push({
+        type: "glyph", char: choose(["吼", "！", "审", "!"]),
+        x: e.x, y: e.y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - rand(0, 60),
+        rot: rand(-1, 1), vr: rand(-6, 6),
+        life: rand(0.42, 0.95), maxLife: 0.95,
+        size: rand(14, 30),
+        color: i % 3 === 0 ? "#f2cf70" : i % 2 ? "#b23f35" : "#7d315f",
+      });
+    }
+    for (let i = 0; i < 24; i++) {
+      const angle = rand(0, Math.PI * 2);
+      const speed = rand(75, 300);
+      particles.push({
+        type: "spark", x: e.x, y: e.y,
+        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        life: rand(0.18, 0.5), maxLife: 0.5,
+        size: rand(1.2, 3.2),
+        color: i % 2 ? "rgba(214,77,49,.9)" : "rgba(245,201,91,.9)",
+      });
+    }
+    floaters.push({
+      x: e.x, y: e.y - 62, text: "吼——",
+      life: 1.05, maxLife: 1.05, color: "#a33b2d", size: 34,
+    });
+    e.finalShieldFlash = 0.45;
+    finalBossFlash = Math.max(finalBossFlash, 0.5);
+    shake = Math.max(shake, 21);
+    sound.roar();
+    showToast("终审咆哮", "无敌即将解除，它要开始攻击了。", "warn");
+  }
+
   function moveFinalBoss(e, dx, dy) {
     e.x = clamp(e.x + dx, ARENA.left + e.radius, ARENA.right - e.radius);
     e.y = clamp(e.y + dy, ARENA.top + e.radius, ARENA.bottom - e.radius);
@@ -2753,6 +2889,10 @@
 
   function updateFinalBoss(e, dt) {
     e.finalShieldFlash = Math.max(0, (e.finalShieldFlash || 0) - dt);
+    if (e.finalInvulnerable && !e.finalRoared && e.finalTimer <= 0.55) {
+      e.finalRoared = true;
+      finalBossRoar(e);
+    }
     e.finalAddTimer = (e.finalAddTimer ?? 5) - dt;
     if (e.finalAddTimer <= 0) {
       e.finalAddTimer = 5;
@@ -3138,7 +3278,7 @@
     pickups.push({
       x, y,
       vx: 0, vy: 0,
-      radius: 10, kind: "fragment", persistent: true,
+      radius: 14.5, kind: "fragment", persistent: true,
       seed: rand(0, 10),
     });
   }
@@ -3147,7 +3287,7 @@
     pickups.push({
       x, y,
       vx: 0, vy: 0,
-      radius: 11, kind: "heal", life: 7, maxLife: 7,
+      radius: 14.5, kind: "heal", life: 7, maxLife: 7,
       seed: rand(0, 10),
     });
   }
@@ -3502,7 +3642,7 @@
     updatePickups(dt);
     updateParticles(dt);
     updateWave(dt);
-    updateRareSpawn(dt);
+    updateRareSpawn();
 
     if (mode === MODE.PLAYING && bonusRewardCharges > 0 && styleRewardWindow.hidden && finalVictoryDelay <= 0 && !finalIntroActive) {
       bonusRewardCharges -= 1;
@@ -4309,10 +4449,10 @@
     ctx.lineCap = "round";
     for (const ray of player.laserRays) {
       const alpha = clamp(ray.life / 0.13, 0, 1);
-      const x = player.x + Math.cos(ray.angle) * 18;
-      const y = player.y + player.bob + Math.sin(ray.angle) * 18;
-      const ex = player.x + Math.cos(ray.angle) * ray.length;
-      const ey = player.y + player.bob + Math.sin(ray.angle) * ray.length;
+      const x = ray.x0 ?? player.x;
+      const y = (ray.y0 ?? player.y) + player.bob;
+      const ex = x + Math.cos(ray.angle) * ray.length;
+      const ey = y + Math.sin(ray.angle) * ray.length;
       ctx.globalAlpha = alpha * 0.30;
       ctx.strokeStyle = "#3a79df";
       ctx.lineWidth = 13;
@@ -4384,9 +4524,9 @@
           const flame = ctx.createLinearGradient(
             b.x - tx * 22, b.y - ty * 22, b.x - tx * 5, b.y - ty * 5
           );
-          flame.addColorStop(0, "rgba(213,104,40,0)");
-          flame.addColorStop(0.55, "rgba(224,128,53,.35)");
-          flame.addColorStop(1, "rgba(255,205,112,.85)");
+          flame.addColorStop(0, "rgba(27,63,107,0)");
+          flame.addColorStop(0.55, "rgba(38,94,160,.4)");
+          flame.addColorStop(1, "rgba(177,216,255,.9)");
           ctx.strokeStyle = flame;
           ctx.lineWidth = 7;
           ctx.lineCap = "round";
@@ -4394,14 +4534,35 @@
           ctx.moveTo(b.x - tx * 24, b.y - ty * 24);
           ctx.lineTo(b.x - tx * 5, b.y - ty * 5);
           ctx.stroke();
+          ctx.save();
+          ctx.translate(b.x, b.y);
+          ctx.rotate(Math.atan2(b.vy, b.vx));
           ctx.font = '700 17px "Times New Roman", "SimSun", serif';
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.lineWidth = 4;
-          ctx.strokeStyle = "rgba(255,248,228,.96)";
-          ctx.strokeText("=", b.x, b.y + 0.5);
-          ctx.fillStyle = b.flash ? "#fff1ca" : "#c25e28";
-          ctx.fillText("=", b.x, b.y + 0.5);
+          ctx.strokeStyle = "rgba(235,246,255,.96)";
+          ctx.strokeText("=", 0, 0.5);
+          ctx.fillStyle = b.flash ? "#cfe8ff" : "#183b66";
+          ctx.fillText("=", 0, 0.5);
+          ctx.restore();
+        } else if (b.rapidEdit) {
+          ctx.strokeStyle = "rgba(91,57,35,.5)";
+          ctx.lineWidth = 1.5;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(b.x - b.vx * 0.012, b.y - b.vy * 0.012);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+          ctx.fillStyle = b.flash ? "#c79a72" : "#4a2a1b";
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 1.6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "rgba(196,153,113,.92)";
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 1.6, 0, Math.PI * 2);
+          ctx.stroke();
         } else if (b.trifurcate) {
           ctx.strokeStyle = "rgba(106,76,178,.5)";
           ctx.lineWidth = 2;
@@ -4773,10 +4934,7 @@
     wireUi();
     setupCheatPanel();
     const cheatQuery = new URLSearchParams(window.location.search).get("cheat");
-    if (cheatQuery === "1") {
-      cheatPanel.hidden = false;
-      syncCheatPanel();
-    }
+    if (cheatQuery === "1") cheatOpenOnStart = true;
     ensureScale();
     updateFragmentHud();
     updateHud();
@@ -4803,20 +4961,21 @@
     window.__wordTank = {
       snapshot: () => ({
         mode, wave, wavePhase, spawnRemaining: spawnQueue.length,
-        waveSpawnTotal, waveSpawned, waveSmallTotal, waveSmallSpawned, rareSpawnedThisWave,
+        waveSpawnTotal, waveSpawned, waveSmallTotal, waveSmallSpawned,
+        rareWillSpawn, rareSpawnAt, rareSpawnedThisWave,
         cheatInvincible, finalIntroActive, finalIntroTimer: +finalIntroTimer.toFixed(2),
         finalVictoryDelay: +finalVictoryDelay.toFixed(2), finalBossFlash: +finalBossFlash.toFixed(2),
         hp: player?.hp, words: stats.words, kills: stats.kills,
         bossesCleared, enemyLevel: enemyLevel(),
         stageHint: stageHintText(), bossKind: currentBossKind,
         elapsed: +stats.elapsed.toFixed(2),
-        formatFragments, bonusRewardCharges, rareSpawnTimer: +rareSpawnTimer.toFixed(1),
+        formatFragments, bonusRewardCharges,
         shake: +shake.toFixed(2), hitFlash: +hitFlash.toFixed(2),
         articleIndex: currentArticleIndex, articleTitle: document.querySelector(".document h1")?.textContent,
         currentRewardSource, pendingArticleSwap,
         damageMeter: damageMeterEl?.textContent,
         pickups: pickups.map((p) => ({
-          x: +p.x.toFixed(1), y: +p.y.toFixed(1),
+          x: +p.x.toFixed(1), y: +p.y.toFixed(1), radius: +p.radius.toFixed(1),
           kind: p.kind || "heal", persistent: !!p.persistent,
           life: p.persistent ? null : +(p.life || 0).toFixed(1),
         })),
@@ -4828,6 +4987,11 @@
           spreadUnlocked: player.spreadUnlocked,
           spreadPairs: player.spreadPairs,
           extraBullets: player.extraBullets,
+          rapidEditStacks: player.rapidEditStacks,
+          moving: player.moving,
+          moveShotTimer: +player.moveShotTimer.toFixed(3),
+          moveAngle: +player.moveAngle.toFixed(3),
+          laserRays: player.laserRays.length,
           damageLevel: player.damageLevel,
           damageMultiplier: +playerDamageMultiplier().toFixed(2),
           fireRateBonus: +player.fireRateBonus.toFixed(2),
@@ -4857,11 +5021,13 @@
           finalTextIndex: e.finalBoss ? e.finalTextIndex : undefined,
           finalTimer: e.finalBoss ? +(e.finalTimer || 0).toFixed(2) : undefined,
           finalInvulnerable: e.finalBoss ? !!e.finalInvulnerable : undefined,
+          finalRoared: e.finalBoss ? !!e.finalRoared : undefined,
         })),
         bullets: bullets.map((b) => ({
           x: +b.x.toFixed(1), y: +b.y.toFixed(1),
           vx: +b.vx.toFixed(2), vy: +b.vy.toFixed(2), fromPlayer: b.fromPlayer,
-          rocket: !!b.rocket, trifurcate: !!b.trifurcate, damage: b.damage,
+          rocket: !!b.rocket, trifurcate: !!b.trifurcate, rapidEdit: !!b.rapidEdit,
+          radius: +b.radius.toFixed(1), damage: b.damage,
         })),
         walls: walls.map((w) => ({
           x: +w.x.toFixed(1), y: +w.y.toFixed(1), w: +w.w.toFixed(1), h: +w.h.toFixed(1),
@@ -4950,7 +5116,11 @@
       },
       dropHealAt: (x, y) => { dropElitePickup(x, y); return pickups.length; },
       dropFragmentAt: (x, y) => { dropFormatFragmentPickup(x, y); return pickups.length; },
-      setRareTimer: (value) => { rareSpawnTimer = Number(value); return rareSpawnTimer; },
+      setRareTrigger: (value) => {
+        rareWillSpawn = true;
+        rareSpawnAt = clamp(Math.round(Number(value) || 0), 0, Math.floor(waveSmallTotal / 2));
+        return rareSpawnAt;
+      },
       hitFirst: (amount = 1) => {
         const e = enemies[0];
         if (!e) return null;
