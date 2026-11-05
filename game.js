@@ -34,6 +34,16 @@
   const canvasArea = $("canvasArea");
   const workspace = $("workspace");
   const introComment = $("introComment");
+  const tutorialCanvas = $("tutorialCanvas");
+  const tutorialCtx = tutorialCanvas.getContext("2d");
+  const tutorialStage = $("tutorialStage");
+  const tutorialKeys = $("tutorialKeys");
+  const tutorialText = $("tutorialText");
+  const tutorialStep = $("tutorialStep");
+  const tutorialDots = $("tutorialDots");
+  const tutorialNextBtn = $("tutorialNextBtn");
+  const tutorialPrevBtn = $("tutorialPrevBtn");
+  const tutorialSkipBtn = $("tutorialSkipBtn");
   const pausePill = $("pausePill");
   const waveStamp = $("waveStamp");
   const waveStampText = $("waveStampText");
@@ -63,6 +73,8 @@
   const muteLabel = $("muteLabel");
   const articleColumns = $("articleColumns");
   const damageMeterEl = $("damageMeter");
+  const fireRateMeterEl = $("fireRateMeter");
+  const ownedCardStrip = $("ownedCardStrip");
   const pageLevelTop = $("pageLevelTop");
   const pageLevelBottom = $("pageLevelBottom");
   const pageEnemyLevel = $("pageEnemyLevel");
@@ -96,6 +108,15 @@
     "格式由我决定",
     "我不接受这次修改",
     "再改一遍试试",
+  ];
+
+  const TUTORIAL_PAGES = [
+    { text: "按WASD移动", keys: "wasd" },
+    { text: "按IJKL发射校对子弹", keys: "ijkl" },
+    { text: "右侧蓝色圆圈是校对权限，也就是你的生命值。", keys: null },
+    { text: "拾取黄色格式碎片获得格式奖励，拾取蓝色权限恢复生命值。", keys: null },
+    { text: "选择格式奖励强化你的校对。", keys: null },
+    { text: "生存到第十波最后击败最终审核吧。", keys: null },
   ];
 
   // Highlighter colour per article map.
@@ -320,7 +341,7 @@
     },
     {
       id: "laser_r", name: "激光审阅", rarity: "red", kind: "style", value: "laser",
-      glyph: "光", desc: "攻击方式改为贯穿式激光。",
+      glyph: "光", desc: "攻击方式改为贯穿式激光，脉冲速度为攻击速度的 150%，单目标基础 DPS 为 150%。",
     },
     {
       id: "rocket_r", name: "火箭校对", rarity: "red", kind: "style", value: "rocket",
@@ -337,6 +358,26 @@
     {
       id: "aura_b", name: "修订光环", rarity: "blue", kind: "aura", value: 1,
       glyph: "域", desc: "自机周围持续产生伤害光环，自动处理靠近的标点。",
+    },
+    {
+      id: "resurrection_w", name: "死而后生", rarity: "white", kind: "healReward", value: 1,
+      glyph: "生", desc: "每拾取四个修订，获得一张白色修正力度奖励卡。",
+    },
+    {
+      id: "grit_r", name: "愈战愈勇", rarity: "red", kind: "killFireRate", value: 1,
+      glyph: "勇", desc: "每击败一个敌人，攻击速度提升 1%。",
+    },
+    {
+      id: "faith_r", name: "信心爆棚", rarity: "red", kind: "bossSpread", value: 1,
+      glyph: "信", desc: "每击败一个 Boss，获得一张注意分散奖励卡。",
+    },
+    {
+      id: "daydream_b", name: "白日梦", rarity: "blue", kind: "whiteDamage", value: 1,
+      glyph: "梦", desc: "每拥有一张白色奖励卡，修正力度 +1；获得时按已有白卡立即结算。",
+    },
+    {
+      id: "blueSea_r", name: "蓝海", rarity: "red", kind: "blueFireRate", value: 1,
+      glyph: "海", desc: "每拥有一张蓝色奖励卡，攻击速度 +20%；获得时按已有蓝卡立即结算。",
     },
   ];
 
@@ -588,6 +629,8 @@
   /* ---------------- state ---------------- */
   let mode = MODE.INTRO;
   let modeBeforeReading = MODE.INTRO;
+  let tutorialPage = 0;
+  let tutorialTime = 0;
   let animationTime = 0;
   let dimensionDpr = 0;
   let walls = [];
@@ -857,7 +900,7 @@
   function playerFireCooldown() {
     const attackRate = player.firingStyle === "rocket"
       ? 0.5
-      : player.firingStyle === "laser" ? 2 : 1;
+      : player.firingStyle === "laser" ? 1.5 : 1;
     return PLAYER_BASE_COOLDOWN / ((1 + player.fireRateBonus) * attackRate);
   }
 
@@ -866,9 +909,28 @@
   }
 
   function updateDamageMeter() {
-    if (!damageMeterEl) return;
-    const level = Math.max(1, Math.round(player?.damageLevel || 1));
-    damageMeterEl.textContent = `修正力度：${"I".repeat(level)}`;
+    if (damageMeterEl) {
+      const level = Math.max(1, Math.round(player?.damageLevel || 1));
+      damageMeterEl.textContent = `修正力度：${"I".repeat(level)}`;
+    }
+    if (fireRateMeterEl) {
+      const rate = Math.round((1 + (player?.fireRateBonus || 0)) * 100);
+      fireRateMeterEl.textContent = `修订攻速：${rate}%`;
+    }
+  }
+
+  function renderOwnedCardsRibbon() {
+    if (!ownedCardStrip) return;
+    const counts = player?.cardCounts || {};
+    const owned = REWARD_POOL.filter((card) => (counts[card.id] || 0) > 0);
+    if (!owned.length) {
+      ownedCardStrip.innerHTML = '<span class="owned-empty">暂无</span>';
+      return;
+    }
+    ownedCardStrip.innerHTML = owned.map((card) => {
+      const count = counts[card.id] || 0;
+      return `<span class="owned-chip ${card.rarity}" title="${card.name}${count > 1 ? ` ×${count}` : ""}"><b>${card.glyph}</b>${count > 1 ? `<em>×${count}</em>` : ""}</span>`;
+    }).join("");
   }
 
   function stageHintText() {
@@ -1069,6 +1131,9 @@
       hp: 4, maxHp: 4, angle: -Math.PI / 2, invuln: 0,
       cooldown: 0, bob: 0, moving: false, ringFlash: 0,
       fireRateBonus: 0, moveBonus: 0, extraBullets: 0, damageLevel: 1,
+      whiteCards: 0, blueCards: 0, redCards: 0, cardCounts: {},
+      resurrectionStacks: 0, healPickupProgress: 0,
+      gritStacks: 0, faithStacks: 0, daydreamStacks: 0, blueSeaStacks: 0,
       formatAbundance: false, rapidEditStacks: 0, moveShotTimer: 0, moveAngle: 0,
       backShieldWidth: 0, shieldFlash: 0,
       firingStyle: "default", spreadUnlocked: false, spreadPairs: 0,
@@ -1129,6 +1194,7 @@
 
   function placePlayerSafely() {
     player = makePlayer();
+    renderOwnedCardsRibbon();
     if (!collidesWall(player.x, player.y, player.radius + 4)) return;
     for (let r = 30; r <= 150; r += 18) {
       for (let i = 0; i < 8; i++) {
@@ -1525,12 +1591,17 @@
     if (reward.kind === "rapidEdit") return player.rapidEditStacks <= 0;
     if (reward.kind === "orbiter") return player.orbiters < 16;
     if (reward.kind === "aura") return player.aura <= 0;
+    if (reward.kind === "healReward") return player.resurrectionStacks <= 0;
+    if (reward.kind === "killFireRate") return player.gritStacks <= 0;
+    if (reward.kind === "bossSpread") return player.faithStacks <= 0;
+    if (reward.kind === "whiteDamage") return player.daydreamStacks <= 0;
+    if (reward.kind === "blueFireRate") return player.blueSeaStacks <= 0;
     return true;
   }
 
   function rewardCardWeight(reward) {
-    if (reward.kind !== "style" || player.firingStyle === "default") return 1;
-    return reward.value === player.firingStyle ? 1 : 0.5;
+    if (reward.kind !== "style") return 1;
+    return player.firingStyle === "default" ? 2 : 0.25;
   }
 
   function pickWeightedReward(pool) {
@@ -1756,11 +1827,83 @@
         player.aura = Math.max(player.aura, reward.value);
         player.auraTimer = 0;
         break;
+      case "healReward":
+        if (player.resurrectionStacks <= 0) player.healPickupProgress = 0;
+        player.resurrectionStacks += reward.value;
+        break;
+      case "killFireRate":
+        player.gritStacks += reward.value;
+        break;
+      case "bossSpread":
+        player.faithStacks += reward.value;
+        break;
+      case "whiteDamage":
+        player.daydreamStacks += reward.value;
+        player.damageLevel += player.whiteCards * reward.value;
+        break;
+      case "blueFireRate":
+        player.blueSeaStacks += reward.value;
+        player.fireRateBonus += player.blueCards * 0.2 * reward.value;
+        break;
       default:
         break;
     }
+
+    // Track acquired cards by rarity, then let already-owned passive cards
+    // settle for this new acquisition. The new passive itself has already
+    // settled against the cards that existed before it was picked.
+    if (reward.rarity === "white") {
+      player.whiteCards += 1;
+      if (player.daydreamStacks > 0) player.damageLevel += player.daydreamStacks;
+    } else if (reward.rarity === "blue") {
+      player.blueCards += 1;
+      if (player.blueSeaStacks > 0) player.fireRateBonus += player.blueSeaStacks * 0.2;
+    } else if (reward.rarity === "red") {
+      player.redCards += 1;
+    }
+    player.cardCounts[reward.id] = (player.cardCounts[reward.id] || 0) + 1;
+    renderOwnedCardsRibbon();
+
     updateDamageMeter();
     if (!cheatPanel.hidden) syncCheatPanel();
+  }
+
+  function grantRewardCardById(id, options = {}) {
+    const reward = REWARD_POOL.find((card) => card.id === id);
+    if (!reward || !player) return null;
+    applyStyleReward(reward);
+    updateHud();
+    if (!options.silent) {
+      showToast(options.title || "额外格式", `获得一张「${reward.name}」奖励卡。`, "");
+    }
+    return reward;
+  }
+
+  function handleHealPickup() {
+    if (!player || player.resurrectionStacks <= 0) return;
+    player.healPickupProgress += 1;
+    if (player.healPickupProgress < 4) return;
+    player.healPickupProgress -= 4;
+    for (let i = 0; i < player.resurrectionStacks; i++) {
+      grantRewardCardById("damage_w", { title: "死而后生" });
+    }
+  }
+
+  function handleDefeatedEnemy(e) {
+    if (!player || !e) return;
+    if (player.gritStacks > 0) {
+      player.fireRateBonus += 0.01 * player.gritStacks;
+      updateDamageMeter();
+    }
+    if (e.boss && player.faithStacks > 0) {
+      for (let i = 0; i < player.faithStacks; i++) {
+        grantRewardCardById("spread_b", { silent: true });
+      }
+      floaters.push({
+        x: e.x, y: e.y - e.radius - 18, text: "+注意分散",
+        life: 1.15, maxLife: 1.15, color: "#2b62bb", size: 10,
+      });
+    }
   }
 
   function chooseStyleReward(index) {
@@ -1800,7 +1943,14 @@
 
     if (code === "Enter" && mode === MODE.INTRO) {
       event.preventDefault();
-      startGame();
+      const active = document.activeElement;
+      if (active && active.tagName === "BUTTON" && introComment.contains(active)) {
+        active.click();
+      } else if (tutorialPage < TUTORIAL_PAGES.length - 1) {
+        setTutorialPage(tutorialPage + 1);
+      } else {
+        startGame();
+      }
       return;
     }
     if (code === "Escape") {
@@ -1992,7 +2142,7 @@
 
   function fireLaser() {
     const hitRadiusBonus = 7;
-    const laserDamage = 2;
+    const laserDamage = 1;
     player.laserRays = buildLaserRays();
     for (const ray of player.laserRays) {
       for (let i = enemies.length - 1; i >= 0; i--) {
@@ -2366,6 +2516,17 @@
     player.spreadPairs = 0;
     player.formatAbundance = false;
     player.rapidEditStacks = 0;
+    player.whiteCards = 0;
+    player.blueCards = 0;
+    player.redCards = 0;
+    player.cardCounts = {};
+    renderOwnedCardsRibbon();
+    player.resurrectionStacks = 0;
+    player.healPickupProgress = 0;
+    player.gritStacks = 0;
+    player.faithStacks = 0;
+    player.daydreamStacks = 0;
+    player.blueSeaStacks = 0;
     player.moveShotTimer = 0;
     player.firingStyle = "default";
     player.laserLife = 0;
@@ -2443,6 +2604,406 @@
     pausePill.classList.remove("show");
     updateHud();
     sound.start();
+  }
+
+  function tutorialKeypad(keys) {
+    const rows = keys === "wasd"
+      ? [["", "W", ""], ["A", "S", "D"]]
+      : [["", "I", ""], ["J", "K", "L"]];
+    return `<div class="tutorial-keypad">${rows.flat().map((key) =>
+      key ? `<kbd data-key="${key}">${key}</kbd>` : '<span class="key-slot"></span>'
+    ).join("")}</div>`;
+  }
+
+  function setTutorialPage(index) {
+    tutorialPage = clamp(Math.round(index), 0, TUTORIAL_PAGES.length - 1);
+    tutorialTime = 0;
+    const page = TUTORIAL_PAGES[tutorialPage];
+    const finalPage = tutorialPage === TUTORIAL_PAGES.length - 1;
+    introComment.classList.toggle("final", finalPage);
+    tutorialStage.hidden = finalPage;
+    tutorialSkipBtn.hidden = finalPage;
+    tutorialNextBtn.hidden = finalPage;
+    tutorialPrevBtn.hidden = finalPage || tutorialPage === 0;
+    $("startGameBtn").hidden = !finalPage;
+    tutorialStep.textContent = `${String(tutorialPage + 1).padStart(2, "0")} / 06`;
+    tutorialText.textContent = page.text;
+    tutorialKeys.innerHTML = page.keys ? tutorialKeypad(page.keys) : "";
+    tutorialStage.classList.toggle("no-keys", !page.keys);
+    tutorialDots.querySelectorAll("i").forEach((dot, dotIndex) => {
+      dot.classList.toggle("active", dotIndex === tutorialPage);
+    });
+    const focusTarget = finalPage ? $("startGameBtn") : tutorialNextBtn;
+    window.setTimeout(() => focusTarget.focus({ preventScroll: true }), 20);
+  }
+
+  function setupTutorial() {
+    tutorialNextBtn.addEventListener("click", () => {
+      if (tutorialPage < TUTORIAL_PAGES.length - 1) setTutorialPage(tutorialPage + 1);
+    });
+    tutorialPrevBtn.addEventListener("click", () => {
+      if (tutorialPage > 0) setTutorialPage(tutorialPage - 1);
+    });
+    tutorialSkipBtn.addEventListener("click", () => setTutorialPage(TUTORIAL_PAGES.length - 1));
+    setTutorialPage(0);
+  }
+
+  function tutorialRoundRect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+
+  function tutorialBackground(c) {
+    c.clearRect(0, 0, 540, 320);
+    c.fillStyle = "#fffdf8";
+    c.fillRect(0, 0, 540, 320);
+    c.strokeStyle = "rgba(176, 164, 143, .14)";
+    c.lineWidth = 1;
+    for (let x = 20; x < 540; x += 36) {
+      c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 320); c.stroke();
+    }
+    for (let y = 18; y < 320; y += 36) {
+      c.beginPath(); c.moveTo(0, y); c.lineTo(540, y); c.stroke();
+    }
+    c.strokeStyle = "rgba(43, 87, 154, .18)";
+    c.setLineDash([4, 6]);
+    c.strokeRect(14, 14, 512, 292);
+    c.setLineDash([]);
+  }
+
+  function tutorialPlayer(c, x, y, alpha = 1, hit = false) {
+    c.save();
+    c.globalAlpha = alpha;
+    c.translate(x, y);
+    // Same white, dark-edged Windows pointer silhouette as the in-game player.
+    c.beginPath();
+    c.moveTo(-9, -15);
+    c.lineTo(-9, 6);
+    c.lineTo(-3, 1);
+    c.lineTo(1, 10);
+    c.lineTo(5, 8);
+    c.lineTo(1, -1);
+    c.lineTo(9, -1);
+    c.closePath();
+    c.shadowColor = "rgba(0,0,0,.24)";
+    c.shadowBlur = 2.5;
+    c.shadowOffsetY = 1.2;
+    c.fillStyle = hit ? "#fff4ef" : "#fbfaf6";
+    c.fill();
+    c.shadowColor = "transparent";
+    c.shadowBlur = 0;
+    c.shadowOffsetY = 0;
+    c.strokeStyle = "#252321";
+    c.lineWidth = 1.45;
+    c.lineJoin = "round";
+    c.stroke();
+    c.fillStyle = "#252321";
+    c.beginPath();
+    c.arc(-8.3, -13.5, 0.9, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  }
+
+  function tutorialHealthRing(c, x, y, hp, maxHp, hit = false) {
+    const radius = 9.6;
+    const gap = 0.14;
+    const span = (Math.PI * 2) / maxHp - gap;
+    const rotation = tutorialTime * 2.1 - Math.PI / 2;
+    c.save();
+    for (let i = 0; i < maxHp; i++) {
+      const start = rotation + i * (Math.PI * 2 / maxHp);
+      c.strokeStyle = "rgba(255,255,255,.76)";
+      c.lineWidth = 5.2;
+      c.lineCap = "round";
+      c.beginPath();
+      c.arc(x, y, radius, start, start + span);
+      c.stroke();
+    }
+    for (let i = 0; i < maxHp; i++) {
+      const start = rotation + i * (Math.PI * 2 / maxHp);
+      const alive = i < hp;
+      c.strokeStyle = alive
+        ? (hit ? "rgba(190,53,40,.98)" : "rgba(44,100,198,.96)")
+        : "rgba(84,85,88,.18)";
+      c.lineWidth = alive ? 3.1 : 1.8;
+      c.lineCap = "round";
+      c.beginPath();
+      c.arc(x, y, radius, start, start + span);
+      c.stroke();
+    }
+    const lead = rotation + Math.min(hp, maxHp) * (Math.PI * 2 / maxHp) - gap / 2;
+    c.fillStyle = hit ? "rgba(255,226,220,.95)" : "rgba(238,247,255,.96)";
+    c.beginPath();
+    c.arc(x + Math.cos(lead) * radius, y + Math.sin(lead) * radius, 1.25, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  }
+
+  function tutorialEnemy(c, x, y, glyph, alpha = 1, scale = 1) {
+    c.save();
+    c.globalAlpha = alpha;
+    c.translate(x, y);
+    c.scale(scale, scale);
+    c.fillStyle = "rgba(164, 55, 40, .1)";
+    c.beginPath();
+    c.arc(0, 0, 20, 0, Math.PI * 2);
+    c.fill();
+    c.font = `700 25px ${FONT_DOC}`;
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.lineWidth = 4;
+    c.strokeStyle = "rgba(255, 252, 246, .95)";
+    c.strokeText(glyph, 0, 1);
+    c.fillStyle = "#993a2d";
+    c.fillText(glyph, 0, 1);
+    c.restore();
+  }
+
+  function tutorialEnemyBreak(c, x, y, progress) {
+    const p = clamp(progress, 0, 1);
+    c.save();
+    c.globalAlpha = 1 - p;
+    c.strokeStyle = "rgba(180, 67, 52, .72)";
+    c.lineWidth = 2.2;
+    c.beginPath();
+    c.arc(x, y, 16 + p * 28, 0, Math.PI * 2);
+    c.stroke();
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI * 2 * i) / 8 + 0.2;
+      const r0 = 12 + p * 22;
+      const r1 = 22 + p * 36;
+      c.strokeStyle = i % 2 ? "rgba(215, 166, 58, .8)" : "rgba(151, 55, 42, .8)";
+      c.lineWidth = 1.6;
+      c.beginPath();
+      c.moveTo(x + Math.cos(angle) * r0, y + Math.sin(angle) * r0);
+      c.lineTo(x + Math.cos(angle) * r1, y + Math.sin(angle) * r1);
+      c.stroke();
+    }
+    c.fillStyle = "rgba(255, 247, 222, .82)";
+    c.font = `700 ${16 + p * 8}px ${FONT_DOC}`;
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.fillText("×", x, y);
+    c.restore();
+  }
+
+  function tutorialPickup(c, x, y, kind, bob = 0) {
+    c.save();
+    c.translate(x, y + bob);
+    const gold = kind === "fragment";
+    c.fillStyle = gold ? "rgba(188, 139, 35, .12)" : "rgba(43, 98, 190, .12)";
+    c.beginPath();
+    c.arc(0, 0, 28, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = gold ? "rgba(174, 124, 23, .48)" : "rgba(44, 105, 196, .48)";
+    c.lineWidth = 1.2;
+    c.setLineDash([3, 4]);
+    c.beginPath();
+    c.arc(0, 0, 19, 0, Math.PI * 2);
+    c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = "#fffdf7";
+    c.beginPath();
+    c.arc(0, 0, 13, 0, Math.PI * 2);
+    c.fill();
+    if (gold) {
+      c.font = `700 19px ${FONT_DOC}`;
+      c.fillStyle = "#9c6c14";
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      c.fillText("¶", 0, 1);
+    } else {
+      c.fillStyle = "#2b62bb";
+      c.beginPath(); c.arc(0, 0, 8, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "rgba(255,255,255,.85)";
+      c.beginPath(); c.arc(-2, -2, 2, 0, Math.PI * 2); c.fill();
+    }
+    c.restore();
+  }
+
+  function drawTutorial() {
+    const c = tutorialCtx;
+    if (!c || tutorialPage >= TUTORIAL_PAGES.length - 1) return;
+    tutorialBackground(c);
+    let activeKey = null;
+
+    if (tutorialPage === 0) {
+      const cx = 270, cy = 160;
+      const path = [
+        { dx: 0, dy: -1, key: "W", angle: -Math.PI / 2 },
+        { dx: 1, dy: 0, key: "D", angle: 0 },
+        { dx: 0, dy: 1, key: "S", angle: Math.PI / 2 },
+        { dx: -1, dy: 0, key: "A", angle: Math.PI },
+      ];
+      const seg = Math.floor(tutorialTime / 0.9) % path.length;
+      const local = (tutorialTime % 0.9) / 0.9;
+      const amount = Math.sin(local * Math.PI) * 78;
+      const p = path[seg];
+      activeKey = p.key;
+      c.save();
+      c.setLineDash([4, 6]);
+      c.strokeStyle = "rgba(43, 87, 154, .3)";
+      c.beginPath();
+      c.moveTo(cx, cy);
+      c.lineTo(cx + p.dx * 92, cy + p.dy * 92);
+      c.stroke();
+      c.setLineDash([]);
+      c.restore();
+      tutorialPlayer(c, cx + p.dx * amount, cy + p.dy * amount);
+      c.fillStyle = "rgba(67, 60, 50, .58)";
+      c.font = `600 11px ${FONT_UI}`;
+      c.textAlign = "center";
+      c.fillText(`${p.key} · ${p.dy < 0 ? "上" : p.dy > 0 ? "下" : p.dx < 0 ? "左" : "右"}`, cx, 294);
+    } else if (tutorialPage === 1) {
+      const cx = 270, cy = 158;
+      const dirs = [
+        { dx: 0, dy: -1, key: "I", x: 270, y: 61 },
+        { dx: -1, dy: 0, key: "J", x: 86, y: 160 },
+        { dx: 0, dy: 1, key: "K", x: 270, y: 259 },
+        { dx: 1, dy: 0, key: "L", x: 454, y: 160 },
+      ];
+      const stepDuration = 0.64;
+      const shotIndex = Math.floor(tutorialTime / stepDuration) % dirs.length;
+      const local = tutorialTime % stepDuration;
+      activeKey = dirs[shotIndex].key;
+      tutorialPlayer(c, cx, cy);
+      dirs.forEach((d, index) => {
+        const enemyDist = Math.hypot(d.x - cx, d.y - cy);
+        if (index < shotIndex) return;
+        if (index === shotIndex) {
+          if (local < 0.18) {
+            const dist = 42 + (local / 0.18) * (enemyDist - 52);
+            c.fillStyle = "#2b62bb";
+            c.beginPath();
+            c.arc(cx + d.dx * dist, cy + d.dy * dist, 2.8, 0, Math.PI * 2);
+            c.fill();
+            c.strokeStyle = "rgba(42, 91, 177, .42)";
+            c.lineWidth = 2.2;
+            c.beginPath();
+            c.moveTo(cx + d.dx * (dist - 14), cy + d.dy * (dist - 14));
+            c.lineTo(cx + d.dx * dist, cy + d.dy * dist);
+            c.stroke();
+            tutorialEnemy(c, d.x, d.y, ["，", "？", "！", "；"][index]);
+          } else if (local < 0.62) {
+            tutorialEnemyBreak(c, d.x, d.y, (local - 0.18) / 0.44);
+          }
+        } else {
+          tutorialEnemy(c, d.x, d.y, ["，", "？", "！", "；"][index]);
+        }
+      });
+      c.fillStyle = "rgba(67, 60, 50, .58)";
+      c.font = `600 11px ${FONT_UI}`;
+      c.textAlign = "center";
+      c.fillText("按顺序四向校对", 270, 294);
+    } else if (tutorialPage === 2) {
+      const cx = 246, cy = 158;
+      const cycle = 3.2;
+      const t = tutorialTime % cycle;
+      const hp = t < 1.05 ? 4 : 3;
+      const hit = t > 1.0 && t < 1.35;
+      const travel = clamp((t - 0.18) / 0.82, 0, 1);
+      if (t < 1.02) {
+        const bx = cx + 150 - travel * 142;
+        c.strokeStyle = "rgba(151, 47, 35, .32)";
+        c.lineWidth = 3;
+        c.beginPath();
+        c.moveTo(bx + 22, cy);
+        c.lineTo(bx + 4, cy);
+        c.stroke();
+        c.fillStyle = "rgba(166, 47, 35, .16)";
+        c.beginPath();
+        c.arc(bx, cy, 6, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = "#9c3d2e";
+        c.beginPath();
+        c.arc(bx, cy, 3, 0, Math.PI * 2);
+        c.fill();
+      } else if (t < 1.4) {
+        const p = (t - 1.0) / 0.4;
+        c.strokeStyle = `rgba(178, 58, 43, ${0.7 * (1 - p)})`;
+        c.lineWidth = 2;
+        c.beginPath();
+        c.arc(cx + 1, cy, 7 + p * 20, 0, Math.PI * 2);
+        c.stroke();
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI * 2 * i) / 6;
+          c.beginPath();
+          c.moveTo(cx + Math.cos(angle) * (7 + p * 12), cy + Math.sin(angle) * (7 + p * 12));
+          c.lineTo(cx + Math.cos(angle) * (15 + p * 20), cy + Math.sin(angle) * (15 + p * 20));
+          c.stroke();
+        }
+      }
+      tutorialPlayer(c, cx, cy, 1, hit);
+      tutorialHealthRing(c, cx + 17, cy + 11, hp, 4, hit);
+      c.fillStyle = "rgba(67, 60, 50, .58)";
+      c.font = `600 11px ${FONT_UI}`;
+      c.textAlign = "center";
+      c.fillText("校对权限减少", 270, 294);
+    } else if (tutorialPage === 3) {
+      const bob = Math.sin(tutorialTime * 3) * 4;
+      tutorialPlayer(c, 210, 160);
+      c.strokeStyle = "rgba(43, 87, 154, .2)";
+      c.lineWidth = 1.5;
+      c.setLineDash([4, 5]);
+      c.beginPath(); c.moveTo(236, 152); c.lineTo(345, 103); c.stroke();
+      c.beginPath(); c.moveTo(236, 168); c.lineTo(345, 225); c.stroke();
+      c.setLineDash([]);
+      tutorialPickup(c, 382, 96, "fragment", bob);
+      tutorialPickup(c, 382, 224, "heal", -bob);
+      c.font = `600 11px ${FONT_UI}`;
+      c.textAlign = "center";
+      c.fillStyle = "#8e6210";
+      c.fillText("格式奖励", 382, 143);
+      c.fillStyle = "#2859a8";
+      c.fillText("恢复生命", 382, 271);
+    } else if (tutorialPage === 4) {
+      const cards = [
+        { x: 130, glyph: "速", color: "#4e83c8", label: "射速" },
+        { x: 270, glyph: "散", color: "#4e83c8", label: "散射" },
+        { x: 410, glyph: "力", color: "#b44334", label: "力度" },
+      ];
+      c.fillStyle = "#2d2923";
+      c.font = `700 18px ${FONT_UI}`;
+      c.textAlign = "left";
+      c.fillText("格式", 38, 42);
+      c.strokeStyle = "#c9c2b7";
+      c.lineWidth = 1;
+      c.beginPath(); c.moveTo(38, 54); c.lineTo(502, 54); c.stroke();
+      cards.forEach((card, index) => {
+        const selected = Math.floor(tutorialTime / 0.9) % cards.length === index;
+        c.save();
+        c.translate(card.x, 158);
+        if (selected) c.scale(1.06, 1.06);
+        tutorialRoundRect(c, -60, -58, 120, 116, 4);
+        c.fillStyle = selected ? "#eef6ff" : "#fffefa";
+        c.fill();
+        c.strokeStyle = selected ? card.color : "#d9d2c7";
+        c.lineWidth = selected ? 2 : 1;
+        c.stroke();
+        c.fillStyle = card.color;
+        c.font = `700 30px ${FONT_DOC}`;
+        c.textAlign = "center";
+        c.textBaseline = "middle";
+        c.fillText(card.glyph, 0, -12);
+        c.fillStyle = "#5d554a";
+        c.font = `600 11px ${FONT_UI}`;
+        c.fillText(card.label, 0, 32);
+        c.restore();
+      });
+      c.fillStyle = "rgba(67, 60, 50, .58)";
+      c.font = `600 11px ${FONT_UI}`;
+      c.textAlign = "center";
+      c.fillText("点击一种格式应用", 270, 294);
+    }
+
+    tutorialKeys.querySelectorAll("kbd").forEach((key) => {
+      key.classList.toggle("active", key.dataset.key === activeKey);
+    });
   }
 
   function startGame() {
@@ -3323,6 +3884,7 @@
         } else {
           player.hp = Math.min(player.maxHp, player.hp + 1);
           player.ringFlash = 0.4;
+          handleHealPickup();
           floaters.push({
             x: player.x, y: player.y - 27, text: "+1 修订",
             life: 1.1, maxLife: 1.1, color: "#2b62bb", size: 10,
@@ -3353,6 +3915,7 @@
     const idx = enemies.indexOf(e);
     if (idx < 0) return;
     enemies.splice(idx, 1);
+    if (credited) handleDefeatedEnemy(e);
     if (credited && e.finalBoss) {
       // The final boss takes the whole page with it: all summoned minions die
       // immediately so the victory screen cannot be delayed by stragglers.
@@ -4775,6 +5338,9 @@
     if (mode !== MODE.REWARD) animationTime += Math.min(raw, 0.08);
     if (mode === MODE.PLAYING || mode === MODE.DYING) {
       updateWorld(dt);
+    } else if (mode === MODE.INTRO) {
+      tutorialTime += Math.min(raw, 0.08);
+      drawTutorial();
     } else if (mode === MODE.PAUSED || mode === MODE.GAMEOVER) {
       // keep transient decorations from freezing mid-air while the document is paused
       if (shake > 0.1) shake *= Math.pow(0.05, dt);
@@ -4817,10 +5383,6 @@
 
   function wireUi() {
     $("startGameBtn").addEventListener("click", (event) => {
-      event.stopPropagation();
-      startGame();
-    });
-    $("introClose").addEventListener("click", (event) => {
       event.stopPropagation();
       startGame();
     });
@@ -4932,6 +5494,7 @@
     loadHighRecord();
     seedIntroScene();
     wireUi();
+    setupTutorial();
     setupCheatPanel();
     const cheatQuery = new URLSearchParams(window.location.search).get("cheat");
     if (cheatQuery === "1") cheatOpenOnStart = true;
@@ -4950,7 +5513,7 @@
       }).catch(() => {});
     }
     window.setTimeout(() => {
-      if (mode === MODE.INTRO) $("startGameBtn").focus({ preventScroll: true });
+      if (mode === MODE.INTRO) tutorialNextBtn.focus({ preventScroll: true });
     }, 350);
   }
 
@@ -4988,6 +5551,10 @@
           spreadPairs: player.spreadPairs,
           extraBullets: player.extraBullets,
           rapidEditStacks: player.rapidEditStacks,
+          whiteCards: player.whiteCards, blueCards: player.blueCards, redCards: player.redCards,
+          resurrectionStacks: player.resurrectionStacks, healPickupProgress: player.healPickupProgress,
+          gritStacks: player.gritStacks, faithStacks: player.faithStacks,
+          daydreamStacks: player.daydreamStacks, blueSeaStacks: player.blueSeaStacks,
           moving: player.moving,
           moveShotTimer: +player.moveShotTimer.toFixed(3),
           moveAngle: +player.moveAngle.toFixed(3),

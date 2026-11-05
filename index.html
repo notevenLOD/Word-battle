@@ -183,11 +183,16 @@
           <div class="group-label">段落</div>
         </div>
 
-        <div class="ribbon-group styles-group" id="stylesRibbonGroup" style="--w:218px">
-          <div class="style-gallery">
-            <button class="style-card"><span class="style-preview normal">正文</span><small>正文</small></button>
-            <button class="style-card"><span class="style-preview heading">标题 1</span><small>标题 1</small></button>
-            <button class="style-card"><span class="style-preview quote">强调</span><small>强调</small></button>
+        <div class="ribbon-group styles-group" id="stylesRibbonGroup" style="--w:330px">
+          <div class="styles-ribbon-content">
+            <div class="style-gallery">
+              <button class="style-card"><span class="style-preview normal">正文</span><small>正文</small></button>
+              <button class="style-card"><span class="style-preview heading">标题 1</span><small>标题 1</small></button>
+              <button class="style-card"><span class="style-preview quote">强调</span><small>强调</small></button>
+            </div>
+            <div class="owned-card-panel">
+              <div class="owned-card-strip" id="ownedCardStrip"><span class="owned-empty">暂无</span></div>
+            </div>
           </div>
           <div class="group-label">样式</div>
         </div>
@@ -396,6 +401,7 @@
               </div>
             </article>
 
+            <div class="damage-meter fire-rate-meter" id="fireRateMeter">修订攻速：100%</div>
             <div class="damage-meter" id="damageMeter">修正力度：I</div>
 
             <div class="page-footer">
@@ -404,23 +410,6 @@
             </div>
 
             <canvas id="gameCanvas" width="1120" height="792" aria-label="文档校对游戏区域"></canvas>
-
-            <div class="intro-comment" id="introComment">
-              <div class="comment-meta">
-                <span class="comment-avatar">李</span>
-                <div><strong>李华</strong><small>责任编辑 · 刚刚</small></div>
-                <button class="comment-close" id="introClose" aria-label="关闭">×</button>
-              </div>
-              <p>这篇英文稿的标点会自己动。移动你的光标来修正它们。被错误碰到会损失可修订次数；每修正一个首领，可以选择一个格式来强化修正。金色格式符会掉落格式碎片，集满三张还能多选一次。</p>
-              <div class="comment-keys">
-                <span><kbd>W A S D</kbd> 移动</span>
-                <span><kbd>I J K L</kbd> 四向开火</span>
-                <span><kbd>P</kbd> 暂停</span>
-                <span><kbd>B</kbd> 阅读视图</span>
-              </div>
-              <button class="comment-start" id="startGameBtn">开始校对 <span>↗</span></button>
-              <div class="comment-hint">I ↑ · J ← · K ↓ · L →　指针旁的加载圈就是可修订次数（生命值）</div>
-            </div>
 
             <div class="wave-stamp" id="waveStamp"><span class="stamp-line"></span><span id="waveStampText">第 1 轮修订</span><span class="stamp-line"></span></div>
           </div>
@@ -485,6 +474,28 @@
         <span class="zoom-value" id="zoomValue">85%</span>
       </div>
     </footer>
+  </div>
+
+  <div class="tutorial-overlay" id="introComment" role="dialog" aria-modal="true" aria-labelledby="tutorialText">
+    <div class="tutorial-card">
+      <button class="tutorial-skip" id="tutorialSkipBtn" type="button">跳过教程</button>
+      <div class="tutorial-step" id="tutorialStep">01 / 06</div>
+      <div class="tutorial-stage" id="tutorialStage">
+        <div class="tutorial-animation">
+          <canvas id="tutorialCanvas" width="540" height="320" aria-hidden="true"></canvas>
+        </div>
+        <div class="tutorial-keys" id="tutorialKeys"></div>
+      </div>
+      <p class="tutorial-text" id="tutorialText">按WASD移动</p>
+      <div class="tutorial-footer">
+        <button class="tutorial-prev" id="tutorialPrevBtn" type="button" hidden>上一页</button>
+        <div class="tutorial-dots" id="tutorialDots">
+          <i class="active"></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <button class="tutorial-next" id="tutorialNextBtn" type="button">下一页</button>
+        <button class="tutorial-start" id="startGameBtn" type="button" hidden>开始校对</button>
+      </div>
+    </div>
   </div>
 
   <div class="modal-backdrop" id="gameOverModal" hidden>

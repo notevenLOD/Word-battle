@@ -442,7 +442,48 @@ kbd {
   background: #fff7e4;
   box-shadow: inset 0 0 0 1px #ead6a8;
 }
-.style-gallery { display: flex; gap: 3px; }
+.styles-ribbon-content { display: flex; gap: 5px; height: 67px; min-width: 0; }
+.style-gallery { display: flex; gap: 3px; flex: 0 0 auto; }
+.owned-card-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: 5px;
+  border-left: 1px solid #e5e1dc;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+.owned-card-strip { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 3px; }
+.owned-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  border: 1px solid #d4cec5;
+  border-radius: 3px;
+  background: #fff;
+  font-family: var(--doc-font);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+.owned-chip.white { border-color: #cfc8bd; background: #fbfaf7; color: #413a31; }
+.owned-chip.blue { border-color: #a9c2df; background: #edf5fd; color: #24528c; }
+.owned-chip.red { border-color: #dfb0a8; background: #fff1ed; color: #9c3b2b; }
+.owned-chip em {
+  position: absolute;
+  right: 1px;
+  bottom: 0;
+  color: #7c746a;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 6.5px;
+  font-style: normal;
+  font-weight: 600;
+}
+.owned-empty { color: #a59d92; font: 500 8px/1.2 "Microsoft YaHei", "PingFang SC", sans-serif; }
 .style-card {
   display: flex;
   flex-direction: column;
@@ -819,6 +860,7 @@ kbd {
   pointer-events: none;
   white-space: nowrap;
 }
+.fire-rate-meter { bottom: 55px; }
 body.reading .damage-meter,
 body.reading .page-enemy-level,
 body.reading .page-level-hint { display: none !important; }
@@ -1678,3 +1720,167 @@ body.reading .style-reward-window { display: none !important; }
 
 /* Keep the intro start button clickable even if the test console is opened. */
 body:not(.playing) .intro-comment { z-index: 220; }
+
+/* Six-page animated tutorial replaces the old intro comment card. */
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(238, 235, 228, .22);
+  opacity: 1;
+  transition: opacity .2s ease;
+}
+.tutorial-overlay.hide { opacity: 0; pointer-events: none; }
+.tutorial-card {
+  position: relative;
+  width: min(980px, calc(100vw - 34px));
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  padding: 30px 34px 26px;
+  border: 1px solid #c9c3b8;
+  border-top: 4px solid #2b579a;
+  border-radius: 4px;
+  background: #fdfcf9;
+  box-shadow: 0 22px 54px rgba(35, 29, 22, .3), 0 4px 12px rgba(35, 29, 22, .14);
+  transform: scale(.5);
+  transform-origin: center center;
+}
+.tutorial-card::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(203, 195, 182, .38);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.tutorial-step {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  color: #8f877b;
+  font: 600 10px/1 "Microsoft YaHei", "PingFang SC", sans-serif;
+  letter-spacing: .8px;
+}
+.tutorial-skip {
+  position: absolute;
+  top: 9px;
+  right: 13px;
+  z-index: 2;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid #d4cdc1;
+  border-radius: 3px;
+  background: #f7f4ee;
+  color: #766e63;
+  font: 600 10px/1 "Microsoft YaHei", "PingFang SC", sans-serif;
+  cursor: pointer;
+}
+.tutorial-skip:hover { background: #eee8de; color: #403a32; }
+.tutorial-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 212px;
+  align-items: center;
+  gap: 28px;
+  margin: 20px 4px 0;
+}
+.tutorial-stage.no-keys { grid-template-columns: minmax(0, 1fr); }
+.tutorial-animation {
+  min-width: 0;
+  border: 1px solid #ded8cd;
+  border-radius: 3px;
+  background: #fffefa;
+  box-shadow: inset 0 0 32px rgba(138, 121, 87, .05);
+  overflow: hidden;
+}
+.tutorial-animation canvas { display: block; width: 100%; height: auto; }
+.tutorial-keys { display: grid; place-items: center; }
+.tutorial-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(2, 50px);
+  gap: 8px;
+}
+.tutorial-keypad .key-slot { width: 56px; height: 50px; }
+.tutorial-keypad kbd {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 50px;
+  border: 1px solid #c9c3b9;
+  border-bottom-width: 3px;
+  border-radius: 4px;
+  background: linear-gradient(#fff, #f0ede8);
+  color: #4b453d;
+  font: 700 20px/1 "Segoe UI", "Microsoft YaHei", sans-serif;
+  box-shadow: 0 2px 0 rgba(70, 58, 44, .06);
+  transition: background .12s ease, color .12s ease, transform .12s ease;
+}
+.tutorial-keypad kbd.active {
+  border-color: #2b579a;
+  background: #e9f2fc;
+  color: #1f4f91;
+  transform: translateY(1px);
+}
+.tutorial-text {
+  min-height: 36px;
+  margin: 22px 4px 8px;
+  color: #302b25;
+  font: 600 18px/1.6 "Microsoft YaHei", "PingFang SC", sans-serif;
+  text-align: center;
+  letter-spacing: .3px;
+}
+.tutorial-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 40px;
+  margin-top: 12px;
+}
+.tutorial-dots { display: flex; gap: 6px; align-items: center; }
+.tutorial-dots i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d4cec4;
+  transition: background .15s ease, transform .15s ease;
+}
+.tutorial-dots i.active { background: #2b579a; transform: scale(1.25); }
+.tutorial-prev, .tutorial-next, .tutorial-start {
+  min-width: 112px;
+  height: 34px;
+  padding: 0 17px;
+  border: 1px solid #2b579a;
+  border-radius: 3px;
+  background: #2b579a;
+  color: #fff;
+  font: 600 12px/1 "Microsoft YaHei", "PingFang SC", sans-serif;
+  cursor: pointer;
+}
+.tutorial-prev {
+  border-color: #cfc8bd;
+  background: #f7f4ee;
+  color: #5f584e;
+}
+.tutorial-next:hover, .tutorial-start:hover { background: #234a83; }
+.tutorial-prev:hover { background: #eee8de; color: #332e27; }
+.tutorial-start[hidden], .tutorial-next[hidden], .tutorial-prev[hidden], .tutorial-skip[hidden] { display: none !important; }
+.tutorial-overlay.final .tutorial-stage,
+.tutorial-overlay.final .tutorial-step,
+.tutorial-overlay.final .tutorial-dots { display: none; }
+.tutorial-overlay.final .tutorial-card { width: min(600px, calc(100vw - 34px)); padding-top: 52px; padding-bottom: 34px; }
+.tutorial-overlay.final .tutorial-text { margin: 16px 0 20px; font-size: 20px; }
+.tutorial-overlay.final .tutorial-footer { margin-top: 6px; }
+
+@media (max-width: 760px) {
+  .tutorial-card { padding: 26px 18px 20px; }
+  .tutorial-stage { grid-template-columns: 1fr; gap: 14px; margin-top: 12px; }
+  .tutorial-stage.no-keys { grid-template-columns: 1fr; }
+  .tutorial-keypad { grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 44px); }
+  .tutorial-keypad kbd, .tutorial-keypad .key-slot { width: 48px; height: 44px; }
+  .tutorial-text { font-size: 15px; margin-top: 14px; }
+}
