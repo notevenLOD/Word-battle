@@ -35,7 +35,7 @@
   const workspace = $("workspace");
   const introComment = $("introComment");
   const tutorialCanvas = $("tutorialCanvas");
-  const tutorialCtx = tutorialCanvas.getContext("2d");
+  const tutorialCtx = tutorialCanvas ? tutorialCanvas.getContext("2d") : null;
   const tutorialStage = $("tutorialStage");
   const tutorialKeys = $("tutorialKeys");
   const tutorialText = $("tutorialText");
@@ -264,6 +264,11 @@
       range: 0, fireRate: 2, wordValue: 190, color: "#6d2348",
       size: 50, bulletSpeed: 180, boss: true, bouncer: true,
     },
+    compare: {
+      glyph: "<", name: "比较符号", hp: 20, speed: 76, radius: 30,
+      range: 0, fireRate: 0, wordValue: 220, color: "#5b1f2a",
+      size: 64, bulletSpeed: 245, boss: true, compareBoss: true,
+    },
     final: {
       glyph: "审", name: "终审修订框", hp: 180, speed: 58, radius: 56,
       range: 0, fireRate: 0, wordValue: 888, color: "#6e294e",
@@ -293,7 +298,7 @@
     },
     {
       id: "fire_r", name: "快速校对 +100%", rarity: "red", kind: "fireRate", value: 1.00,
-      glyph: "速", desc: "射速提升 100%，可重复叠加。",
+      glyph: "速", desc: "射速提升 100%。",
     },
     {
       id: "damage_w", name: "修正力度 +1", rarity: "white", kind: "damageAdd", value: 1,
@@ -309,11 +314,11 @@
     },
     {
       id: "move_w", name: "轻快走位 +50%", rarity: "white", kind: "moveSpeed", value: 0.50,
-      glyph: "步", desc: "移速提升 50%，上限为初始移速的 200%。",
+      glyph: "步", desc: "移速提升 50%，提升上限为100%。",
     },
     {
       id: "move_b", name: "轻快走位 +100%", rarity: "blue", kind: "moveSpeed", value: 1.00,
-      glyph: "步", desc: "移速提升 100%，上限为初始移速的 200%。",
+      glyph: "步", desc: "移速提升 100%。",
     },
     {
       id: "shield_w", name: "扩宽背面盾", rarity: "white", kind: "shieldAdd", value: PLAYER_BASE_WIDTH / 2,
@@ -325,7 +330,7 @@
     },
     {
       id: "spread_b", name: "注意分散", rarity: "blue", kind: "spread", value: 1,
-      glyph: "散", desc: "获得向外散射的额外弹道，重复选取时在最大角度外各再加 1 条弹道。",
+      glyph: "散", desc: "获得向外散射的额外弹道；围满一圈后重叠弹道合并为一条，伤害按重叠数量相乘。",
     },
     {
       id: "abundance_r", name: "格式繁多", rarity: "red", kind: "rewardOption", value: 1,
@@ -341,22 +346,22 @@
     },
     {
       id: "laser_r", name: "激光审阅", rarity: "red", kind: "style", value: "laser",
-      glyph: "光", desc: "攻击方式改为贯穿式激光，脉冲速度为攻击速度的 150%，单目标基础 DPS 为 150%。",
+      glyph: "光", desc: "攻击方式改为贯穿式激光，脉冲速度为攻击速度的 150%。",
     },
     {
       id: "rocket_r", name: "火箭校对", rarity: "red", kind: "style", value: "rocket",
-      glyph: "=", desc: "攻击方式改为火箭：深蓝色火箭弹单发伤害为原攻击的 300%，射速降为 50%，命中敌人后爆炸。",
+      glyph: "=", desc: "攻击方式改为火箭，单发伤害为原攻击的 300%，射速降为 50%，命中敌人后爆炸。",
     },
     {
       id: "trifurcate_r", name: "三叉", rarity: "red", kind: "style", value: "trifurcate",
-      glyph: "三", desc: "将攻击方式替换为三向散弹；子弹显示为紫色短横线 -。",
+      glyph: "三", desc: "将攻击方式替换为10度夹角的三向散弹。",
     },
     {
       id: "orbit_b", name: "环绕脚注", rarity: "blue", kind: "orbiter", value: 2,
       glyph: "环", desc: "增加 2 颗大型环绕脚注，绕自机旋转、撞击敌人并拦截子弹。",
     },
     {
-      id: "aura_b", name: "修订光环", rarity: "blue", kind: "aura", value: 1,
+      id: "aura_w", name: "修订光环", rarity: "white", kind: "aura", value: 1,
       glyph: "域", desc: "自机周围持续产生伤害光环，自动处理靠近的标点。",
     },
     {
@@ -373,11 +378,11 @@
     },
     {
       id: "daydream_b", name: "白日梦", rarity: "blue", kind: "whiteDamage", value: 1,
-      glyph: "梦", desc: "每拥有一张白色奖励卡，修正力度 +1；获得时按已有白卡立即结算。",
+      glyph: "梦", desc: "每拥有一张白色奖励卡，修正力度 +1。",
     },
     {
       id: "blueSea_r", name: "蓝海", rarity: "red", kind: "blueFireRate", value: 1,
-      glyph: "海", desc: "每拥有一张蓝色奖励卡，攻击速度 +20%；获得时按已有蓝卡立即结算。",
+      glyph: "海", desc: "每拥有一张蓝色奖励卡，攻击速度 +20%。",
     },
   ];
 
@@ -1177,6 +1182,18 @@
         : ARENA.right - def.radius - 12;
     }
     if (def.bouncer) e.fireTimer = def.fireRate ? 1 / def.fireRate : 1;
+    if (def.compareBoss) {
+      e.compareState = "idle";
+      e.compareTimer = rand(1.4, 2.1);
+      e.compareAttackIndex = 0;
+      e.compareAngle = angle;
+      e.compareAim = angle;
+      e.compareCharge = 0;
+      e.compareDelay = 0;
+      e.compareRecover = 0;
+      e.compareBeam = null;
+      e.compareSafe = false;
+    }
     if (def.finalBoss) {
       e.finalTimer = rand(1.2, 1.8);
       e.finalAddTimer = 5;
@@ -1315,7 +1332,7 @@
   }
 
   function chooseBossKind() {
-    const kinds = ["sentence", "brackets", "at"];
+    const kinds = ["sentence", "brackets", "at", "compare"];
     const pool = lastBossKind ? kinds.filter((kind) => kind !== lastBossKind) : kinds;
     currentBossKind = choose(pool);
     lastBossKind = currentBossKind;
@@ -1325,6 +1342,7 @@
   function bossDefeatedTitle(kind = currentBossKind) {
     if (kind === "brackets") return "方括号已拆解";
     if (kind === "at") return "邮件符已拆解";
+    if (kind === "compare") return "比较符号已拆解";
     if (kind === "final") return "终审修订框已拆解";
     return "长句已拆解";
   }
@@ -1438,12 +1456,16 @@
     if (def.boss) {
       shake = Math.max(shake, 9);
       showToast(
-        def.bouncer ? "邮件符警告" : def.bracket ? "方括号警告" : "长句警告",
+        def.bouncer ? "邮件符警告"
+          : def.bracket ? "方括号警告"
+            : def.compareBoss ? "比较符号警告" : "长句警告",
         def.bouncer
           ? "一个 @ 正在页面上斜向弹跳。"
           : def.bracket
             ? "方括号从页面边缘压了过来。"
-            : "一个绕不过去的长句进入了文档。",
+            : def.compareBoss
+              ? "一个 < 正把尖端对准你的光标。"
+              : "一个绕不过去的长句进入了文档。",
         "warn"
       );
     }
@@ -1496,7 +1518,8 @@
     if (isBoss) {
       const bossKey = currentBossKind === "brackets"
         ? "__bracket_pair"
-        : currentBossKind === "at" ? "__at_boss" : "ellipsis";
+        : currentBossKind === "at" ? "__at_boss"
+          : currentBossKind === "compare" ? "compare" : "ellipsis";
       // Normal bosses enter only after at least half of the small enemies
       // have already appeared.
       queue.splice(Math.ceil(smallCount / 2), 0, bossKey);
@@ -1523,7 +1546,7 @@
     spawnQueue = waveQueueFor(n);
     waveSpawnTotal = spawnQueue.length;
     waveSpawned = 0;
-    const bossKeys = new Set(["ellipsis", "__bracket_pair", "__at_boss", "__final_boss"]);
+    const bossKeys = new Set(["ellipsis", "compare", "__bracket_pair", "__at_boss", "__final_boss"]);
     waveSmallTotal = spawnQueue.filter((key) => !bossKeys.has(key)).length;
     waveSmallSpawned = 0;
     rareSpawnedThisWave = false;
@@ -1943,6 +1966,10 @@
 
     if (code === "Enter" && mode === MODE.INTRO) {
       event.preventDefault();
+      if (!tutorialNextBtn) {
+        startGame();
+        return;
+      }
       const active = document.activeElement;
       if (active && active.tagName === "BUTTON" && introComment.contains(active)) {
         active.click();
@@ -2091,6 +2118,7 @@
       rocket: !!options.rocket,
       trifurcate: !!options.trifurcate,
       rapidEdit: !!options.rapidEdit,
+      laneMultiplier: options.laneMultiplier ?? 1,
     });
   }
 
@@ -2100,15 +2128,31 @@
     return { x: mx, y: my };
   }
 
-  function playerShotOffsets() {
-    if (!player || !player.spreadUnlocked) return [0];
-    const step = Math.PI / 6;
-    const offsets = [-step, 0, step];
-    for (let pair = 1; pair <= player.spreadPairs; pair++) {
-      const outer = step * (1 + pair);
-      offsets.push(-outer, outer);
+  function playerShotLanes() {
+    if (!player || !player.spreadUnlocked) {
+      return [{ offset: 0, multiplier: 1 }];
     }
-    return offsets;
+    // Spread lanes are multiples of 30 degrees from -(P+1) to +(P+1).
+    // Once the fan wraps around, several raw lanes land on the same angle.
+    // Collapse each angle into one lane and keep its total damage multiplier.
+    const maxOffset = Math.max(0, player.spreadPairs) + 1;
+    const lanes = [];
+    for (let k = 0; k < 12; k++) {
+      const minM = -maxOffset;
+      const minMod = ((minM % 12) + 12) % 12;
+      const first = minM + ((k - minMod + 12) % 12);
+      if (first > maxOffset) continue;
+      const count = Math.floor((maxOffset - first) / 12) + 1;
+      let offset = (k * Math.PI) / 6;
+      if (offset >= Math.PI) offset -= Math.PI * 2;
+      lanes.push({ offset, multiplier: count });
+    }
+    lanes.sort((a, b) => a.offset - b.offset);
+    return lanes;
+  }
+
+  function playerShotOffsets() {
+    return playerShotLanes().map((lane) => lane.offset);
   }
 
   function laserRayGeometry(angle, perpendicularOffset = 0) {
@@ -2129,12 +2173,12 @@
   function buildLaserRays() {
     const rays = [];
     const raysPerLane = 1 + player.extraBullets;
-    for (const laneOffset of playerShotOffsets()) {
-      const angle = aimAngle + laneOffset;
+    for (const lane of playerShotLanes()) {
+      const angle = aimAngle + lane.offset;
       for (let i = 0; i < raysPerLane; i++) {
         const offset = raysPerLane === 1 ? 0 : (i - (raysPerLane - 1) / 2) * 9;
         const ray = laserRayGeometry(angle, offset);
-        rays.push({ ...ray, life: 0.13 });
+        rays.push({ ...ray, life: 0.13, multiplier: lane.multiplier });
       }
     }
     return rays;
@@ -2153,7 +2197,7 @@
         const px = ray.x0 + ray.dx * t;
         const py = ray.y0 + ray.dy * t;
         if (dist2(e.x, e.y, px, py) <= (e.radius + hitRadiusBonus) ** 2) {
-          damageEnemy(e, laserDamage, px, py);
+          damageEnemy(e, laserDamage * (ray.multiplier || 1), px, py);
         }
       }
     }
@@ -2176,14 +2220,16 @@
   }
 
   function fireRocketVolley() {
-    const angles = playerShotOffsets().map((offset) => aimAngle + offset);
+    const lanes = playerShotLanes();
     const bulletsPerRay = 1 + player.extraBullets;
-    for (const angle of angles) {
+    for (const lane of lanes) {
+      const angle = aimAngle + lane.offset;
       for (let i = 0; i < bulletsPerRay; i++) {
         const offset = bulletsPerRay === 1 ? 0 : (i - (bulletsPerRay - 1) / 2) * 9;
         const muzzle = playerMuzzle(angle, offset);
         spawnBullet(muzzle.x, muzzle.y, angle, 335, true, {
-          rocket: true, radius: 5.4, damage: 3, life: 3.1, color: "#1b3f6b",
+          rocket: true, radius: 5.4, damage: 3 * lane.multiplier, life: 3.1,
+          color: "#1b3f6b", laneMultiplier: lane.multiplier,
         });
       }
     }
@@ -2202,17 +2248,17 @@
   }
 
   function fireTrifurcateVolley() {
-    const lanes = playerShotOffsets();
+    const lanes = playerShotLanes();
     const bulletsPerRay = 1 + player.extraBullets;
     const subSpread = Math.PI / 18;
     for (const lane of lanes) {
       for (let i = 0; i < bulletsPerRay; i++) {
         const parallel = bulletsPerRay === 1 ? 0 : (i - (bulletsPerRay - 1) / 2) * 6.2;
         for (const sub of [-subSpread, 0, subSpread]) {
-          const angle = aimAngle + lane + sub;
+          const angle = aimAngle + lane.offset + sub;
           const muzzle = playerMuzzle(angle, parallel);
           spawnBullet(muzzle.x, muzzle.y, angle, 610, true, {
-            damage: 0.8, radius: 2.5, color: "#6a4cb2", trifurcate: true,
+            damage: 0.8 * lane.multiplier, radius: 2.5, color: "#6a4cb2", trifurcate: true,
           });
         }
       }
@@ -2231,13 +2277,13 @@
     sound.shoot();
   }
 
-  function explodeRocket(x, y, directEnemy = null) {
+  function explodeRocket(x, y, directEnemy = null, multiplier = 1) {
     const radius = 72;
     for (let i = enemies.length - 1; i >= 0; i--) {
       const e = enemies[i];
       if (!e || e === directEnemy || e.spawnT > 0) continue;
       if (dist2(x, y, e.x, e.y) <= (radius + e.radius) ** 2) {
-        damageEnemy(e, 2, e.x, e.y);
+        damageEnemy(e, 2 * multiplier, e.x, e.y);
       }
     }
     for (let i = 0; i < 12; i++) {
@@ -2297,13 +2343,16 @@
       fireTrifurcateVolley();
       return;
     }
-    const baseAngles = playerShotOffsets().map((offset) => aimAngle + offset);
+    const lanes = playerShotLanes();
     const bulletsPerRay = 1 + player.extraBullets;
-    for (const angle of baseAngles) {
+    for (const lane of lanes) {
+      const angle = aimAngle + lane.offset;
       for (let i = 0; i < bulletsPerRay; i++) {
         const offset = bulletsPerRay === 1 ? 0 : (i - (bulletsPerRay - 1) / 2) * 6.2;
         const muzzle = playerMuzzle(angle, offset);
-        spawnBullet(muzzle.x, muzzle.y, angle, 610, true);
+        spawnBullet(muzzle.x, muzzle.y, angle, 610, true, {
+          damage: lane.multiplier,
+        });
       }
     }
     shake = Math.max(shake, 1.8);
@@ -2638,6 +2687,8 @@
   }
 
   function setupTutorial() {
+    if (!tutorialNextBtn || !tutorialPrevBtn || !tutorialSkipBtn ||
+      !tutorialStage || !tutorialText || !tutorialStep || !tutorialDots) return;
     tutorialNextBtn.addEventListener("click", () => {
       if (tutorialPage < TUTORIAL_PAGES.length - 1) setTutorialPage(tutorialPage + 1);
     });
@@ -3394,6 +3445,119 @@
     }
   }
 
+  function compareLaserGeometry(e, angle) {
+    const dx = Math.cos(angle);
+    const dy = Math.sin(angle);
+    let length = 0;
+    for (let s = 0; s <= 1100; s += 3) {
+      const x = e.x + dx * s;
+      const y = e.y + dy * s;
+      if (x < ARENA.left || x > ARENA.right || y < ARENA.top || y > ARENA.bottom) break;
+      if (walls.some((w) => pointInRect(x, y, w, 2))) break;
+      length = s;
+    }
+    return { angle, dx, dy, length };
+  }
+
+  function fireCompareBullet(e, angle) {
+    e.compareAngle = angle;
+    e.turretAngle = angle;
+    const muzzleX = e.x + Math.cos(angle) * (e.radius + 8);
+    const muzzleY = e.y + Math.sin(angle) * (e.radius + 8);
+    spawnBullet(muzzleX, muzzleY, angle, e.bulletSpeed || 245, false, {
+      radius: 3.8, color: "#932c35", life: 3.4, boss: true,
+    });
+    sound.enemyShoot();
+    shake = Math.max(shake, 3.5);
+  }
+
+  function fireCompareLaser(e) {
+    const angle = e.compareAngle;
+    const geometry = compareLaserGeometry(e, angle);
+    e.compareBeam = {
+      angle, length: geometry.length, life: 0.24, maxLife: 0.24,
+    };
+    const dodged = e.compareSafe || player.moving;
+    if (!dodged) {
+      const t = clamp(
+        (player.x - e.x) * geometry.dx + (player.y - e.y) * geometry.dy,
+        0,
+        geometry.length
+      );
+      const px = e.x + geometry.dx * t;
+      const py = e.y + geometry.dy * t;
+      if (dist2(px, py, player.x, player.y) <= (player.radius + 7) ** 2) {
+        damagePlayer(1);
+      }
+    }
+    shake = Math.max(shake, 8);
+    sound.laser();
+  }
+
+  function updateCompareBoss(e, dt) {
+    if (e.compareBeam) {
+      e.compareBeam.life -= dt;
+      if (e.compareBeam.life <= 0) e.compareBeam = null;
+    }
+    const aim = Math.atan2(player.y - e.y, player.x - e.x);
+
+    if (e.compareState === "idle") {
+      e.turretAngle = aim;
+      e.compareTimer -= dt;
+      if (e.compareTimer <= 0) {
+        e.compareAttackIndex += 1;
+        if (e.compareAttackIndex % 2 === 1) {
+          fireCompareBullet(e, aim);
+          e.compareTimer = rand(1.7, 2.2);
+        } else {
+          e.compareState = "charging";
+          e.compareCharge = 1.15;
+          e.compareAim = aim;
+          e.turretAngle = aim;
+          sound.hit();
+          shake = Math.max(shake, 2.6);
+        }
+      }
+      return;
+    }
+
+    if (e.compareState === "charging") {
+      e.compareAim = aim;
+      e.turretAngle = aim;
+      e.compareCharge -= dt;
+      if (e.compareCharge <= 0) {
+        e.compareState = "locked";
+        e.compareAngle = aim;
+        e.compareAim = aim;
+        e.compareDelay = 0.55;
+        e.compareSafe = !!player.moving;
+        e.turretAngle = e.compareAngle;
+        shake = Math.max(shake, 4.5);
+        sound.hit();
+      }
+      return;
+    }
+
+    if (e.compareState === "locked") {
+      e.turretAngle = e.compareAngle;
+      e.compareDelay -= dt;
+      if (e.compareDelay <= 0) {
+        fireCompareLaser(e);
+        e.compareState = "recover";
+        e.compareRecover = 0.38;
+      }
+      return;
+    }
+
+    if (e.compareState === "recover") {
+      e.compareRecover -= dt;
+      if (e.compareRecover <= 0) {
+        e.compareState = "idle";
+        e.compareTimer = rand(1.45, 2.05);
+      }
+    }
+  }
+
   function finalBossRoar(e) {
     for (let wave = 0; wave < 3; wave++) {
       particles.push({
@@ -3677,8 +3841,9 @@
       }
 
       const wobble = Math.sin(animationTime * 1.15 + e.seed) * 0.045;
-      const vx = Math.cos(desiredAngle + wobble) * desiredSpeed + sepX;
-      const vy = Math.sin(desiredAngle + wobble) * desiredSpeed + sepY;
+      const compareScale = e.compareBoss && e.compareState && e.compareState !== "idle" ? 0.55 : 1;
+      const vx = Math.cos(desiredAngle + wobble) * desiredSpeed * compareScale + sepX;
+      const vy = Math.sin(desiredAngle + wobble) * desiredSpeed * compareScale + sepY;
       const collided = moveWithWalls(e, vx * dt, vy * dt, e.radius);
       if (collided) {
         if (e.avoidT <= 0) {
@@ -3687,8 +3852,12 @@
         }
       }
 
-      e.turretAngle = e.charge > 0 ? e.chargeAngle : aim.angle;
-      updateEnemyFire(e, dt, dist, los, aim);
+      if (e.compareBoss) {
+        updateCompareBoss(e, dt);
+      } else {
+        e.turretAngle = e.charge > 0 ? e.chargeAngle : aim.angle;
+        updateEnemyFire(e, dt, dist, los, aim);
+      }
 
       if (dist < e.radius + player.radius + 1 && player.invuln <= 0) {
         damagePlayer(1);
@@ -4008,7 +4177,7 @@
           if (dist2(b.x, b.y, e.x, e.y) < (e.radius + b.radius) ** 2) {
             bullets.splice(i, 1);
             damageEnemy(e, b.damage, b.x, b.y);
-            if (b.rocket) explodeRocket(b.x, b.y, e);
+            if (b.rocket) explodeRocket(b.x, b.y, e, b.laneMultiplier || 1);
             consumed = true;
             break;
           }
@@ -4650,6 +4819,140 @@
     ctx.restore();
   }
 
+  function drawCompareBoss(e) {
+    const flash = e.flash > 0;
+    const alpha = e.spawnT > 0 ? clamp(1 - e.spawnT / 0.7, 0, 0.75) : 1;
+    const chargeActive = e.compareState === "charging";
+    const locked = e.compareState === "locked";
+    const warningAngle = chargeActive ? e.compareAim : e.compareAngle;
+
+    if (chargeActive || locked) {
+      const geo = compareLaserGeometry(e, warningAngle);
+      const chargePct = chargeActive
+        ? 1 - clamp(e.compareCharge / 1.15, 0, 1)
+        : 1;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(e.x, e.y);
+      ctx.rotate(warningAngle);
+      ctx.lineCap = "round";
+      ctx.setLineDash([]);
+      ctx.strokeStyle = locked
+        ? "rgba(196,64,43,.18)"
+        : `rgba(179,58,42,${0.05 + chargePct * 0.16})`;
+      ctx.lineWidth = locked ? 9 : 5 + chargePct * 4;
+      ctx.beginPath();
+      ctx.moveTo(e.radius * 0.6, 0);
+      ctx.lineTo(geo.length, 0);
+      ctx.stroke();
+      ctx.setLineDash(locked ? [] : [8, 7]);
+      ctx.strokeStyle = locked
+        ? `rgba(196,64,43,${0.52 + 0.28 * Math.sin(animationTime * 24)})`
+        : `rgba(179,58,42,${0.12 + chargePct * 0.5})`;
+      ctx.lineWidth = locked ? 3.2 : 1.6 + chargePct * 2;
+      ctx.beginPath();
+      ctx.moveTo(e.radius * 0.6, 0);
+      ctx.lineTo(geo.length, 0);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (locked) {
+        ctx.globalAlpha = alpha * (0.35 + 0.25 * Math.sin(animationTime * 30));
+        ctx.strokeStyle = "rgba(255,218,160,.9)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(e.radius * 0.6, 0);
+        ctx.lineTo(geo.length, 0);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Obvious charge ring around the comparison mark.
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(e.x, e.y);
+      ctx.strokeStyle = locked ? "rgba(170,45,33,.72)" : "rgba(174,57,39,.45)";
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, e.radius + 13, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * chargePct);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(232,159,70,.34)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 5]);
+      ctx.beginPath();
+      ctx.arc(0, 0, e.radius + 19, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    if (e.compareBeam) {
+      const beam = e.compareBeam;
+      const fade = clamp(beam.life / beam.maxLife, 0, 1);
+      ctx.save();
+      ctx.globalAlpha = alpha * fade;
+      ctx.translate(e.x, e.y);
+      ctx.rotate(beam.angle);
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "rgba(197,54,37,.28)";
+      ctx.lineWidth = 24;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(beam.length, 0); ctx.stroke();
+      ctx.strokeStyle = "rgba(211,65,43,.88)";
+      ctx.lineWidth = 9;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(beam.length, 0); ctx.stroke();
+      ctx.strokeStyle = "rgba(255,245,224,.98)";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(beam.length, 0); ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(e.x, e.y);
+    if (e.compareState === "charging" || e.compareState === "locked") {
+      const glow = ctx.createRadialGradient(0, 0, 8, 0, 0, e.radius + 34);
+      glow.addColorStop(0, "rgba(211,75,46,.28)");
+      glow.addColorStop(1, "rgba(211,75,46,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(0, 0, e.radius + 34, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.save();
+    ctx.rotate(e.turretAngle + Math.PI);
+    ctx.font = `${e.size}px ${FONT_DOC}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 7;
+    ctx.strokeStyle = "rgba(255,250,242,.9)";
+    ctx.strokeText("<", 0, 0);
+    ctx.fillStyle = flash ? "#d94836" : "#4d1b17";
+    ctx.fillText("<", 0, 0);
+    ctx.restore();
+
+    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = flash ? "rgba(218,66,46,.98)" : "rgba(157,48,37,.85)";
+    ctx.beginPath();
+    ctx.moveTo(-28, e.radius + 4);
+    ctx.lineTo(28, e.radius + 4);
+    ctx.stroke();
+    const pct = clamp(e.hp / e.maxHp, 0, 1);
+    ctx.fillStyle = "rgba(158,49,38,.18)";
+    roundRectPath(-30, e.radius + 8, 60, 1.8, 1);
+    ctx.fill();
+    ctx.fillStyle = "rgba(154,43,33,.75)";
+    roundRectPath(-30, e.radius + 8, 60 * pct, 1.8, 1);
+    ctx.fill();
+    ctx.font = `700 10px ${FONT_UI}`;
+    ctx.fillStyle = "rgba(168,57,38,.9)";
+    ctx.textAlign = "center";
+    if (chargeActive) ctx.fillText("蓄力中…", 0, -e.radius - 27);
+    else if (locked) ctx.fillText("方向锁定", 0, -e.radius - 27);
+    ctx.font = `8.5px ${FONT_UI}`;
+    ctx.fillStyle = "rgba(142,66,55,.86)";
+    ctx.fillText("比较", 0, -e.radius - 12);
+    ctx.restore();
+  }
+
   function drawEnemy(e) {
     if (!e) return;
     if (e.finalBoss) {
@@ -4658,6 +4961,10 @@
     }
     if (e.gold) {
       drawGoldEnemy(e);
+      return;
+    }
+    if (e.compareBoss) {
+      drawCompareBoss(e);
       return;
     }
     if (e.bracket) {
@@ -5513,7 +5820,7 @@
       }).catch(() => {});
     }
     window.setTimeout(() => {
-      if (mode === MODE.INTRO) tutorialNextBtn.focus({ preventScroll: true });
+      if (mode === MODE.INTRO && tutorialNextBtn) tutorialNextBtn.focus({ preventScroll: true });
     }, 350);
   }
 
@@ -5585,6 +5892,11 @@
           bounceCount: e.bouncer ? e.bounceCount : undefined,
           bracketSide: e.bracket ? e.side : undefined,
           fleeTimer: e.gold ? +e.fleeTimer.toFixed(1) : undefined,
+          compareState: e.compareBoss ? e.compareState : undefined,
+          compareCharge: e.compareBoss ? +(e.compareCharge || 0).toFixed(2) : undefined,
+          compareDelay: e.compareBoss ? +(e.compareDelay || 0).toFixed(2) : undefined,
+          compareAngle: e.compareBoss ? +(e.compareAngle || 0).toFixed(3) : undefined,
+          compareBeam: e.compareBoss ? (e.compareBeam ? +e.compareBeam.life.toFixed(2) : null) : undefined,
           finalTextIndex: e.finalBoss ? e.finalTextIndex : undefined,
           finalTimer: e.finalBoss ? +(e.finalTimer || 0).toFixed(2) : undefined,
           finalInvulnerable: e.finalBoss ? !!e.finalInvulnerable : undefined,
@@ -5594,7 +5906,7 @@
           x: +b.x.toFixed(1), y: +b.y.toFixed(1),
           vx: +b.vx.toFixed(2), vy: +b.vy.toFixed(2), fromPlayer: b.fromPlayer,
           rocket: !!b.rocket, trifurcate: !!b.trifurcate, rapidEdit: !!b.rapidEdit,
-          radius: +b.radius.toFixed(1), damage: b.damage,
+          radius: +b.radius.toFixed(1), damage: +b.damage.toFixed(2), laneMultiplier: b.laneMultiplier,
         })),
         walls: walls.map((w) => ({
           x: +w.x.toFixed(1), y: +w.y.toFixed(1), w: +w.w.toFixed(1), h: +w.h.toFixed(1),
